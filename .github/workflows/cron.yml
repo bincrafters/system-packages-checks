@@ -35,7 +35,8 @@ jobs:
       - name: Generate Job Matrix
         id: set-matrix
         run: |
-          MATRIX=$(python3 main.py)
+          python3 main.py
+          MATRIX=$(cat matrix.yml)
           echo "${MATRIX}"
           echo "::set-output name=matrix::${MATRIX}"
           
@@ -67,6 +68,7 @@ jobs:
         env:
           CONAN_SYSREQUIRES_MODE: enabled
           CONAN_SYSREQUIRES_SUDO: 0
+          DEBIAN_FRONTEND: noninteractive
         run: |
           conan install cmake/3.18.2@ -g virtualrunenv -b missing -s compiler.version=5 -s compiler.cppstd=11
           source ./activate_run.sh

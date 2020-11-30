@@ -113,18 +113,20 @@ class MatrixGenerator:
 
         for pr in self.prs.values():
             pr_number = str(pr["number"])
-            subprocess.run(["git", "clone", "--depth", "1", "--no-checkout", "-b", pr["head"]["ref"], pr["head"]["repo"]["html_url"], pr_number], capture_output=True)
+            subprocess.run(["git", "clone", "--depth", "1", "--no-checkout", "-b", pr["head"]["ref"], pr["head"]["repo"]["html_url"], pr_number], check=True)
             os.chdir(pr_number)
-            subprocess.run(["git", "sparse-checkout", "init", "--cone"], capture_output=True)
+            subprocess.run(["git", "sparse-checkout", "init", "--cone"], check=True)
             for package in pr['libs']:
-                subprocess.run(["git", "sparse-checkout", "set", os.path.join("recipes", package)], capture_output=True)
+                subprocess.run(["git", "sparse-checkout", "set", os.path.join("recipes", package)], check=True)
+                subprocess.run(["git", "checkout"], check=True)
                 _add_package(package, pr["head"]["repo"]["full_name"], pr["head"]["ref"], "recipes", pr_number)
             os.chdir("..")
             shutil.rmtree(pr_number)
                 
 
 
-        print(json.dumps({"include": res}))
+        with open("matrix.yml", "w") as f:
+            json.dump({"include": res}, f)
 
                 
 
