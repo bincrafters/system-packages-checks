@@ -2,7 +2,6 @@ import os
 import json
 import yaml
 import requests
-import shutil
 from multiprocessing import Pool
 
 def _get_diff(pr):
@@ -72,13 +71,14 @@ class MatrixGenerator:
         res = []
 
         def _add_package(package, repo, ref, pr = "0"):
-            filepath = os.path.join(package, "config.yml")
-            if not os.path.isfile(filepath):
+            r = requests.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/config.yml" % (repo, ref, package))
+            if r.status_code == requests.codes.not_found:
+                print("no config.yml found for package %s in pr %s" % (package, pr))
                 return
-            with open(filepath) as file:
-                config = yaml.safe_load(file)
-                if "system" not in config["versions"]:
-                    return
+            r.raise_for_status()
+            config = yaml.safe_load(r.text)
+            if "system" not in config["versions"]:
+                return
             distros = {
                 "opensuse/tumbleweed",
                 "opensuse/leap",
@@ -105,24 +105,13 @@ class MatrixGenerator:
                     'pr': pr,
                 })
                 
-        os.chdir( os.path.join("CCI", "recipes"))
-        for package in os.listdir():
+        for package in os.listdir(os.path.join("CCI", "recipes")):
             _add_package(package, '%s/%s' % (self.owner, self.repo), 'master')
-        os.chdir("../..")
 
         for pr in self.prs.values():
             pr_number = str(pr["number"])
             for package in pr['libs']:
-                r = requests.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/config.yml" % (pr["head"]["repo"]["full_name"], pr["head"]["ref"], package))
-                if r.status_code == requests.codes.not_found:
-                    print("no config.yml found for package %s in pr %s" % (package, pr_number))
-                    continue
-                r.raise_for_status()
-                os.mkdir(package)
-                with open(os.path.join(package, "config.yml"), "w") as f:
-                    f.write(r.text)
                 _add_package(package, pr["head"]["repo"]["full_name"], pr["head"]["ref"], pr_number)
-                shutil.rmtree(package)
 
 
         with open("matrix.yml", "w") as f:
