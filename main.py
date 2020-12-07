@@ -9,6 +9,30 @@ def _get_diff(pr):
     r.raise_for_status()
     return r.text
 
+
+def _add_package(package, repo, ref, pr = "0"):
+    r = requests.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/config.yml" % (repo, ref, package))
+    if r.status_code == requests.codes.not_found:
+        folder = "system"
+        r = requests.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/%s/conanfile.py" % (repo, ref, package, folder))
+        if r.status_code == requests.codes.not_found:
+            print("no system folder found for package %s in pr %s %s" % (package, pr, r.url))
+            return None
+        r.raise_for_status()
+    else:
+        r.raise_for_status()
+        config = yaml.safe_load(r.text)
+        if "system" not in config["versions"]:
+            return None
+        folder = config["versions"]["system"]["folder"]
+    return {
+            'package': package,
+            'repo': repo,
+            'ref': ref,
+            'folder': folder,
+            'pr': pr,
+        }
+
 class MatrixGenerator:
     owner = "conan-io"
     repo = "conan-center-index"
@@ -68,50 +92,43 @@ class MatrixGenerator:
         return r
 
     def generate_matrix(self):
-        res = []
-
-        def _add_package(package, repo, ref, pr = "0"):
-            r = requests.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/config.yml" % (repo, ref, package))
-            if r.status_code == requests.codes.not_found:
-                print("no config.yml found for package %s in pr %s" % (package, pr))
-                return
-            r.raise_for_status()
-            config = yaml.safe_load(r.text)
-            if "system" not in config["versions"]:
-                return
-            distros = {
-                "opensuse/tumbleweed",
-                "opensuse/leap",
-                "debian:10",
-                "debian:9",
-                "ubuntu:hirsute",
-                "ubuntu:groovy",
-                "ubuntu:focal",
-                "ubuntu:bionic",
-                "ubuntu:xenial",
-                "centos:8",
-                "archlinux",
-                "fedora:33",
-                "fedora:32",
-                "fedora:31",
-            }
-            for distro in distros:
-                res.append({
-                    'package': package,
-                    'distro': distro,
-                    'repo': repo,
-                    'ref': ref,
-                    'folder': config["versions"]["system"]["folder"],
-                    'pr': pr,
-                })
                 
-        for package in os.listdir(os.path.join("CCI", "recipes")):
-            _add_package(package, '%s/%s' % (self.owner, self.repo), 'master')
+        r = self._make_request("GET", f"/repos/{self.owner}/{self.repo}/contents/recipes")
 
-        for pr in self.prs.values():
-            pr_number = str(pr["number"])
-            for package in pr['libs']:
-                _add_package(package, pr["head"]["repo"]["full_name"], pr["head"]["ref"], pr_number)
+        
+        with Pool(os.cpu_count()) as p:
+            status_futures = []
+            for package in  r.json():
+                status_futures.append(p.apply_async(_add_package, (package['name'], '%s/%s' % (self.owner, self.repo), 'master',)))
+
+            for pr in self.prs.values():
+                pr_number = str(pr["number"])
+                for package in pr['libs']:
+                    status_futures.append(p.apply_async(_add_package, (package, pr["head"]["repo"]["full_name"], pr["head"]["ref"], pr_number,)))
+
+            res = []
+            for f in status_futures:
+                c = f.get()
+                if c is None:
+                    continue
+                for distro in {"opensuse/tumbleweed",
+                                "opensuse/leap",
+                                "debian:10",
+                                "debian:9",
+                                "ubuntu:hirsute",
+                                "ubuntu:groovy",
+                                "ubuntu:focal",
+                                "ubuntu:bionic",
+                                "ubuntu:xenial",
+                                "centos:8",
+                                "archlinux",
+                                "fedora:33",
+                                "fedora:32",
+                                "fedora:31",
+                            }:
+                    c['distro'] = distro
+                    res.append(c)
+
 
 
         with open("matrix.yml", "w") as f:
