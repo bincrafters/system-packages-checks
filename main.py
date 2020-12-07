@@ -2,7 +2,6 @@ import os
 import json
 import yaml
 import requests
-import subprocess
 import shutil
 from multiprocessing import Pool
 
@@ -72,8 +71,8 @@ class MatrixGenerator:
     def generate_matrix(self):
         res = []
 
-        def _add_package(package, repo, ref, root_folder, pr = "0"):
-            filepath = os.path.join(root_folder, package, "config.yml")
+        def _add_package(package, repo, ref, pr = "0"):
+            filepath = os.path.join(package, "config.yml")
             if not os.path.isfile(filepath):
                 return
             with open(filepath) as file:
@@ -106,22 +105,24 @@ class MatrixGenerator:
                     'pr': pr,
                 })
                 
-        root_folder = os.path.join("CCI", "recipes")
-        for package in os.listdir(root_folder):
-            _add_package(package, '%s/%s' % (self.owner, self.repo), 'master', root_folder)
+        os.chdir( os.path.join("CCI", "recipes"))
+        for package in os.listdir():
+            _add_package(package, '%s/%s' % (self.owner, self.repo), 'master')
+        os.chdir("../..")
 
         for pr in self.prs.values():
             pr_number = str(pr["number"])
-            subprocess.run(["git", "clone", "--depth", "1", "--no-checkout", "-b", pr["head"]["ref"], pr["head"]["repo"]["html_url"], pr_number], check=True)
-            os.chdir(pr_number)
-            subprocess.run(["git", "sparse-checkout", "init", "--cone"], check=True)
             for package in pr['libs']:
-                subprocess.run(["git", "sparse-checkout", "set", os.path.join("recipes", package)], check=True)
-                subprocess.run(["git", "checkout"], check=True)
-                _add_package(package, pr["head"]["repo"]["full_name"], pr["head"]["ref"], "recipes", pr_number)
-            os.chdir("..")
-            shutil.rmtree(pr_number)
-                
+                r = requests.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/config.yml" % (pr["head"]["repo"]["full_name"], pr["head"]["ref"], package))
+                if r.status_code == requests.codes.not_found:
+                    print("no config.yml found for package %s in pr %s" % (package, pr_number))
+                    continue
+                r.raise_for_status()
+                os.mkdir(package)
+                with open(os.path.join(package, "config.yml"), "w") as f:
+                    f.write(r.text)
+                _add_package(package, pr["head"]["repo"]["full_name"], pr["head"]["ref"], pr_number)
+                shutil.rmtree(package)
 
 
         with open("matrix.yml", "w") as f:
