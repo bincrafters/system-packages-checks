@@ -3,6 +3,7 @@ import json
 import yaml
 import requests
 import asyncio, aiohttp
+import copy
 
 class MatrixGenerator:
     owner = "conan-io"
@@ -87,28 +88,13 @@ class MatrixGenerator:
                         if "system" not in config["versions"]:
                             return
                         folder = config["versions"]["system"]["folder"]
-                res.extend([{
+                res.append({
                         'package': package,
                         'repo': repo,
                         'ref': ref,
                         'folder': folder,
                         'pr': pr,
-                        'distro': distro,
-                    } for distro in {"opensuse/tumbleweed",
-                                "opensuse/leap",
-                                "debian:10",
-                                "debian:9",
-                                "ubuntu:hirsute",
-                                "ubuntu:groovy",
-                                "ubuntu:focal",
-                                "ubuntu:bionic",
-                                "ubuntu:xenial",
-                                "centos:8",
-                                "archlinux",
-                                "fedora:33",
-                                "fedora:32",
-                                "fedora:31",
-                            }])
+                    })
             tasks = []
             for package in  r.json():
                 tasks.append(asyncio.create_task(_add_package(package['name'], '%s/%s' % (self.owner, self.repo), 'master')))
@@ -120,11 +106,34 @@ class MatrixGenerator:
 
             await asyncio.gather(*tasks)
 
+        linux = []
+        for p in res:
+            for distro in {"opensuse/tumbleweed",
+                            "opensuse/leap",
+                            "debian:10",
+                            "debian:9",
+                            "ubuntu:hirsute",
+                            "ubuntu:groovy",
+                            "ubuntu:focal",
+                            "ubuntu:bionic",
+                            "ubuntu:xenial",
+                            "centos:8",
+                            "archlinux",
+                            "fedora:33",
+                            "fedora:32",
+                            "fedora:31"
+                            }:
+                config = copy.deepcopy(p)
+                config['distro'] = distro
+                linux.append(config)
 
 
-        with open("matrix.yml", "w") as f:
+        with open("matrixLinux.yml", "w") as f:
+            json.dump({"include": linux}, f)
+
+
+        with open("matrixBSD.yml", "w") as f:
             json.dump({"include": res}, f)
-
                 
 
 

@@ -8,7 +8,8 @@ on:
   schedule:
     - cron:  '0 * * * *'
   push:
-    branches: [ main ]
+    branches:
+      - '**' 
 
 
 env:
@@ -20,7 +21,8 @@ jobs:
     name: Generate Job Matrix
     runs-on: ubuntu-20.04
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrixLinux: ${{ steps.set-matrix.outputs.matrixLinux }}
+      matrixBSD: ${{ steps.set-matrix.outputs.matrixBSD }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
@@ -31,15 +33,47 @@ jobs:
         id: set-matrix
         run: |
           python3 main.py
-          MATRIX=$(cat matrix.yml)
-          echo "${MATRIX}"
-          echo "::set-output name=matrix::${MATRIX}"
+          MATRIXLINUX=$(cat matrixLinux.yml)
+          echo "${MATRIXLINUX}"
+          echo "::set-output name=matrixLinux::${MATRIXLINUX}"
           
-  check:
+          MATRIXBSD=$(cat matrixBSD.yml)
+          echo "${MATRIXBSD}"
+          echo "::set-output name=matrixBSD::${MATRIXBSD}"
+  
+  FreeBSD:
     needs: generate-matrix
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
+      matrix: ${{fromJson(needs.generate-matrix.outputs.matrixBSD)}}
+      
+    runs-on: macos-latest
+
+    env:
+      CC: clang
+      CXX: clang++
+      CONAN_SYSREQUIRES_MODE: enabled
+    steps:
+    - name: Checkout CCI
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ matrix.repo }}
+        ref: ${{ matrix.ref }}
+        path: CCI
+    - name: run
+      id: test
+      uses: vmactions/freebsd-vm@v0.0.9
+      with:
+        envs: 'CONAN_MAKE_PROGRAM CC CXX CONAN_SYSREQUIRES_MODE'
+        usesh: true
+        prepare: pkg install -y cmake conan python3 sudo pkgconf
+        run: conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@
+        
+  Linux:
+    needs: generate-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.generate-matrix.outputs.matrixLinux)}}
       
     runs-on: ubuntu-20.04
     container: ${{ matrix.distro }}
@@ -84,4 +118,3 @@ jobs:
           conan install cmake/3.18.2@ -g virtualrunenv -b missing -s compiler.version=5 -s compiler.cppstd=11
           source ./activate_run.sh
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@
-
