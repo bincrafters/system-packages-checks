@@ -66,8 +66,9 @@ jobs:
       with:
         envs: 'CONAN_MAKE_PROGRAM CC CXX CONAN_SYSREQUIRES_MODE'
         usesh: true
-        prepare: pkg install -y cmake conan python3 sudo pkgconf
+        prepare: pkg install -y cmake py37-pip py37-sqlite3 sudo pkgconf
         run: |
+          pip install conan
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
