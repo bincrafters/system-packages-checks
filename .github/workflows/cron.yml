@@ -118,6 +118,7 @@ jobs:
           conan install cmake/3.18.2@ -g virtualrunenv -b missing -s compiler.version=5 -s compiler.cppstd=11
           source ./activate_run.sh
           code=0
+          set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
           if [ $code == 6 ]
           then
