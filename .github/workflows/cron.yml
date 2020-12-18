@@ -67,7 +67,15 @@ jobs:
         envs: 'CONAN_MAKE_PROGRAM CC CXX CONAN_SYSREQUIRES_MODE'
         usesh: true
         prepare: pkg install -y cmake conan python3 sudo pkgconf
-        run: conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@
+        run: |
+          code=0
+          set +o pipefail
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
+          if [ $code == 6 ]
+          then
+            code=0
+          fi
+          exit "$code"
         
   Linux:
     needs: generate-matrix
