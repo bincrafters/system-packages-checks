@@ -118,7 +118,8 @@ class MatrixGenerator:
                             "ubuntu:bionic",
                             "ubuntu:xenial",
                             "centos:8",
-                            "archlinux",
+                            # disabled until https://bugs.archlinux.org/task/69563 is fixed
+                            # "archlinux",
                             "fedora:33",
                             "fedora:32",
                             "fedora:31"
