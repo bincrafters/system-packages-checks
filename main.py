@@ -146,7 +146,6 @@ class MatrixGenerator:
                 
 
 
-
 def main():
     d = MatrixGenerator(token=os.getenv("GH_TOKEN"))
     loop = asyncio.get_event_loop()
