@@ -127,6 +127,7 @@ class MatrixGenerator:
                             "centos:8",
                             # disabled until https://bugs.archlinux.org/task/69563 is fixed
                             # "archlinux",
+                            "fedora:34",
                             "fedora:33",
                             "fedora:32",
                             "fedora:31"
