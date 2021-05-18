@@ -123,7 +123,6 @@ class MatrixGenerator:
                             "ubuntu:groovy",
                             "ubuntu:focal",
                             "ubuntu:bionic",
-                            "ubuntu:xenial",
                             "centos:8",
                             # disabled until https://bugs.archlinux.org/task/69563 is fixed
                             # "archlinux",
