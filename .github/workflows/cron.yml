@@ -158,12 +158,13 @@ jobs:
       id: test
       uses: pguyot/arm-runner-action@v1
       with:
+        image_additional_mb: 100
         commands: |
           #!/bin/bash
           export CONAN_SYSREQUIRES_MODE=enabled
           export CONAN_SYSREQUIRES_SUDO=0
           export DEBIAN_FRONTEND=noninteractive
-          apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make
+          apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make cmake
           pip3 install --upgrade pip && pip3 install conan --ignore-installed
           code=0
           # set +o pipefail
