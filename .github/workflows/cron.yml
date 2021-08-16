@@ -147,10 +147,6 @@ jobs:
       
     runs-on: ubuntu-latest
 
-    env:
-      CONAN_SYSREQUIRES_MODE: enabled
-      CONAN_SYSREQUIRES_SUDO: 0
-      DEBIAN_FRONTEND: noninteractive
     steps:
     - name: Checkout CCI
       uses: actions/checkout@v2
@@ -164,6 +160,9 @@ jobs:
       with:
         commands: |
           #!/bin/bash
+          export CONAN_SYSREQUIRES_MODE=enabled
+          export CONAN_SYSREQUIRES_SUDO=0
+          export DEBIAN_FRONTEND=noninteractive
           apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make
           pip3 install --upgrade pip && pip3 install conan --ignore-installed
           code=0
