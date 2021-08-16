@@ -136,3 +136,35 @@ jobs:
             code=0
           fi
           exit "$code"
+
+  Raspberry:
+    needs: generate-matrix
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.generate-matrix.outputs.matrixBSD)}}
+      
+    runs-on: ubuntu-latest
+
+    env:
+      CONAN_SYSREQUIRES_MODE: enabled
+    steps:
+    - name: Checkout CCI
+      uses: actions/checkout@v2
+      with:
+        repository: ${{ matrix.repo }}
+        ref: ${{ matrix.ref }}
+        path: CCI
+    - name: run
+      id: test
+      uses: pguyot/arm-runner-action@v1
+      with:
+        commands: |
+          pip install conan
+          code=0
+          set +o pipefail
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
+          if [ $code == 6 ]
+          then
+            code=0
+          fi
+          exit "$code"
