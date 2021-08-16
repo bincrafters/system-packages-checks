@@ -164,13 +164,8 @@ jobs:
           export CONAN_SYSREQUIRES_MODE=enabled
           export CONAN_SYSREQUIRES_SUDO=0
           export DEBIAN_FRONTEND=noninteractive
-          apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make cmake
+          export CC=gcc
+          export CXX=g++
+          apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config gcc g++ make cmake
           pip3 install --upgrade pip && pip3 install conan --ignore-installed
-          code=0
-          # set +o pipefail
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
-          if [ $code == 6 ]
-          then
-            code=0
-          fi
-          exit "$code"
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@
