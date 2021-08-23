@@ -157,7 +157,7 @@ jobs:
         path: CCI
     - name: run
       id: test
-      uses: pguyot/arm-runner-action@v1
+      uses: pguyot/arm-runner-action@main
       with:
         image_additional_mb: 1024
         shell: bash
