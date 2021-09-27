@@ -115,7 +115,8 @@ class MatrixGenerator:
 
         linux = []
         for p in res:
-            for distro in {"opensuse/tumbleweed",
+            for distro in { # disabled until https://mobile.twitter.com/stabbbles/status/1440780481507692545 is fixed
+                            #"opensuse/tumbleweed",
                             "opensuse/leap",
                             "debian:10",
                             "debian:9",
