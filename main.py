@@ -4,6 +4,7 @@ import yaml
 import requests
 import asyncio, aiohttp
 import copy
+import urllib.parse
 
 class MatrixGenerator:
     owner = "conan-io"
@@ -109,7 +110,7 @@ class MatrixGenerator:
                     if not pr["head"]["repo"]:
                         print("no repo detected for pr #%s" % pr_number)
                         continue
-                    tasks.append(asyncio.create_task(_add_package(package, pr["head"]["repo"]["full_name"], pr["head"]["ref"], pr_number)))
+                    tasks.append(asyncio.create_task(_add_package(package, pr["head"]["repo"]["full_name"], urllib.parse.quote_plus(pr["head"]["ref"]), pr_number)))
 
             await asyncio.gather(*tasks)
 
