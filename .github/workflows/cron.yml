@@ -70,7 +70,7 @@ jobs:
         usesh: true
         prepare: pkg install -y cmake py38-pip py38-sqlite3 sudo pkgconf
         run: |
-          python38 -m pip install conan
+          python3.8 -m pip install conan
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
