@@ -29,7 +29,7 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python-version: "3.8"
-      - run: "pip3 install pyyaml requests aiohttp"
+      - run: "python3 -m pip install pyyaml requests aiohttp"
       - name: Generate Job Matrix
         id: set-matrix
         run: |
@@ -70,7 +70,7 @@ jobs:
         usesh: true
         prepare: pkg install -y cmake py38-pip py38-sqlite3 sudo pkgconf
         run: |
-          pip install conan
+          python -m pip install conan
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
@@ -112,7 +112,7 @@ jobs:
           esac
         
       - name: install conan
-        run: pip3 install --upgrade pip && pip3 install conan --ignore-installed
+        run: python3 -m pip install --upgrade pip && python3 -m pip install conan --ignore-installed
         
       - name: Checkout CCI
         uses: actions/checkout@v2
@@ -166,8 +166,8 @@ jobs:
           export CONAN_SYSREQUIRES_SUDO=0
           export DEBIAN_FRONTEND=noninteractive
           apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make
-          pip3 install --upgrade pip && pip3 install conan --ignore-installed
-          pip3 install cmake
+          python3 -m pip install --upgrade pip && python3 -m pip install conan --ignore-installed
+          python3 -m pip install cmake
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
