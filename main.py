@@ -118,7 +118,7 @@ class MatrixGenerator:
         for p in res:
             for distro in { # disabled until https://mobile.twitter.com/stabbbles/status/1440780481507692545 is fixed
                             #"opensuse/tumbleweed",
-                            "opensuse/leap",
+                            "opensuse/leap:15.2",
                             "debian:10",
                             "debian:9",
                             "ubuntu:hirsute",
