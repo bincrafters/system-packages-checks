@@ -126,8 +126,7 @@ class MatrixGenerator:
                             "ubuntu:focal",
                             "ubuntu:bionic",
                             "centos:8",
-                            # disabled until https://bugs.archlinux.org/task/69563 is fixed
-                            # "archlinux",
+                            "archlinux",
                             "fedora:34",
                             "fedora:33",
                             "fedora:32",
