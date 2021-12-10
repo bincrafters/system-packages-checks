@@ -130,7 +130,7 @@ class MatrixGenerator:
                             "centos:8",
                             "archlinux",                
                             "fedora:36",
-                            "fedora:35"
+                            "fedora:35",
                             "fedora:34",
                             "fedora:33",
                             }:
