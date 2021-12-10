@@ -119,18 +119,20 @@ class MatrixGenerator:
             for distro in { # disabled until https://mobile.twitter.com/stabbbles/status/1440780481507692545 is fixed
                             #"opensuse/tumbleweed",
                             "opensuse/leap:15.2",
+                            "debian:11",
                             "debian:10",
                             "debian:9",
+                            "ubuntu:jammy",
+                            "ubuntu:impish",
                             "ubuntu:hirsute",
-                            "ubuntu:groovy",
                             "ubuntu:focal",
                             "ubuntu:bionic",
                             "centos:8",
-                            "archlinux",
+                            "archlinux",                
+                            "fedora:36",
+                            "fedora:35"
                             "fedora:34",
                             "fedora:33",
-                            "fedora:32",
-                            "fedora:31"
                             }:
                 config = copy.deepcopy(p)
                 config['distro'] = distro
