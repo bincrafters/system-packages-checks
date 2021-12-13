@@ -167,7 +167,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make
           python3 -m pip install --upgrade pip && python3 -m pip install conan --ignore-installed
-          python3 -m pip install -Iv cmake==3.22.0 # workarround scikit-build/cmake-python-distributions#192
+          python3 -m pip install cmake --only-binary :all: # workarround scikit-build/cmake-python-distributions#192
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
