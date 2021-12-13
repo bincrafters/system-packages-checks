@@ -165,7 +165,7 @@ jobs:
           export CONAN_SYSREQUIRES_MODE=enabled
           export CONAN_SYSREQUIRES_SUDO=0
           export DEBIAN_FRONTEND=noninteractive
-          apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make cmake
+          apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make cmake ninja
           python3 -m pip install --upgrade pip && python3 -m pip install conan --ignore-installed
           python3 -m pip install cmake
           code=0
