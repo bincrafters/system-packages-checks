@@ -168,7 +168,7 @@ jobs:
           export PIP_ONLY_BINARY=cmake # workaround scikit-build/cmake-python-distributions#192
           apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make
           python3 -m pip install --upgrade pip && python3 -m pip install conan --ignore-installed
-          python3 -m pip install cmake
+          python3 -m pip install cmake -Iv cmake==3.22.0
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
