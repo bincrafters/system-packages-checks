@@ -128,6 +128,7 @@ class MatrixGenerator:
                             "ubuntu:focal",
                             "ubuntu:bionic",
                             "centos:8",
+                            "almalinux:8.5"
                             "archlinux",                
                             "fedora:36",
                             "fedora:35",
