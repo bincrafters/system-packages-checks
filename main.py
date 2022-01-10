@@ -71,9 +71,6 @@ class MatrixGenerator:
         return r
 
     async def generate_matrix(self):
-                
-        r = self._make_request("GET", f"/repos/{self.owner}/{self.repo}/contents/recipes")
-
         res = []
                 
         async with aiohttp.ClientSession() as session:
@@ -101,7 +98,7 @@ class MatrixGenerator:
                         'pr': pr,
                     })
             tasks = []
-            for package in  r.json():
+            for package in  os.listdir("CCI/recipes"):
                 tasks.append(asyncio.create_task(_add_package(package['name'], '%s/%s' % (self.owner, self.repo), 'master')))
 
             for pr in self.prs.values():

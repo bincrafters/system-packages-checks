@@ -25,7 +25,12 @@ jobs:
       matrixLinux: ${{ steps.set-matrix.outputs.matrixLinux }}
       matrixBSD: ${{ steps.set-matrix.outputs.matrixBSD }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2        
+      - name: Checkout CCI
+        uses: actions/checkout@v2
+        with:
+          repository: conan-io/conan-center-index
+          path: CCI
       - uses: actions/setup-python@v1
         with:
           python-version: "3.8"
