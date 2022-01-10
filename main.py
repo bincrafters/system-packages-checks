@@ -99,7 +99,7 @@ class MatrixGenerator:
                     })
             tasks = []
             for package in  os.listdir("CCI/recipes"):
-                tasks.append(asyncio.create_task(_add_package(package['name'], '%s/%s' % (self.owner, self.repo), 'master')))
+                tasks.append(asyncio.create_task(_add_package(package, '%s/%s' % (self.owner, self.repo), 'master')))
 
             for pr in self.prs.values():
                 pr_number = str(pr["number"])
