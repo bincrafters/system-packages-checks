@@ -134,7 +134,7 @@ jobs:
           CONAN_SYSREQUIRES_SUDO: 0
           DEBIAN_FRONTEND: noninteractive
         run: |
-          # conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config 
+          conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config 
           conan install cmake/3.18.2@ -g virtualrunenv -b missing -s compiler.version=5 -s compiler.cppstd=11
           source ./activate_run.sh
           code=0
