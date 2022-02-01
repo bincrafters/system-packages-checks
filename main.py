@@ -124,7 +124,6 @@ class MatrixGenerator:
                             "ubuntu:hirsute",
                             "ubuntu:focal",
                             "ubuntu:bionic",
-                            "centos:7",
                             "almalinux:8.5",
                             "archlinux",                
                             "fedora:36",
