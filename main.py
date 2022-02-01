@@ -130,6 +130,8 @@ class MatrixGenerator:
                             "fedora:35",
                             "fedora:34",
                             "fedora:33",
+                            "quay.io/centos/centos:stream8,
+                            "quay.io/centos/centos:stream9,
                             }:
                 config = copy.deepcopy(p)
                 config['distro'] = distro
