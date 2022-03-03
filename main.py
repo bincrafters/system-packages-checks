@@ -89,7 +89,7 @@ class MatrixGenerator:
                         try:
                             config = yaml.safe_load(await r.text())
                         except yaml.YAMLError as exc:
-                            print "Error in configuration file:", package, repo, ref, pr, exc
+                            print("Error in configuration file:%s, %s, %s, %s, %s" % (package, repo, ref, pr, exc))
                             return
                         if "system" not in config["versions"]:
                             return
