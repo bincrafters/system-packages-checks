@@ -122,6 +122,7 @@ class MatrixGenerator:
                             "opensuse/leap:15.2",
                             "debian:11",
                             "debian:10",
+                            "ubuntu:kinetic",
                             "ubuntu:jammy",
                             "ubuntu:impish",
                             "ubuntu:hirsute",
