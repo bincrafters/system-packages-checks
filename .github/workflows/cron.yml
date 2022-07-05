@@ -79,11 +79,21 @@ jobs:
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
+          echo job_id: ${{ matrix.job_id }} > artifact_FreeBSD_${{ matrix.job_id }}.yml
+          echo package: ${{ matrix.package }} >> artifact_FreeBSD_${{ matrix.job_id }}.yml
+          echo pr: ${{ matrix.pr }} >> artifact_FreeBSD_${{ matrix.job_id }}.yml
+          echo distro: FreeBSD >> artifact_FreeBSD_${{ matrix.job_id }}.yml
+          echo res: $code >> artifact_FreeBSD_${{ matrix.job_id }}.yml
           if [ $code == 6 ]
           then
             code=0
           fi
           exit "$code"
+      - uses: actions/upload-artifact@v3
+        if: ${{ always() }} 
+        with:
+          name: my-artifact
+          path: artifact_${{ matrix.job_id }}.yml
         
   Linux:
     if: ${{ true }}
@@ -142,11 +152,22 @@ jobs:
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
+          echo job_id: ${{ matrix.job_id }} > artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
+          echo package: ${{ matrix.package }} >> artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
+          echo pr: ${{ matrix.pr }} >> artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
+          echo distro: ${{ matrix.distro }} >> artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
+          echo res: $code >> artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
           if [ $code == 6 ]
           then
             code=0
           fi
           exit "$code"
+          
+      - uses: actions/upload-artifact@v3
+        if: ${{ always() }} 
+        with:
+          name: my-artifact
+          path: artifact_${{ matrix.job_id }}.yml
 
   Raspberry:
     if: ${{ true }}
@@ -181,8 +202,18 @@ jobs:
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
+          echo job_id: ${{ matrix.job_id }} > artifact_Raspberry_${{ matrix.job_id }}.yml
+          echo package: ${{ matrix.package }} >> artifact_Raspberry_${{ matrix.job_id }}.yml
+          echo pr: ${{ matrix.pr }} >> artifact_Raspberry_${{ matrix.job_id }}.yml
+          echo distro: Raspberry >> artifact_Raspberry_${{ matrix.job_id }}.yml
+          echo res: $code >> artifact_Raspberry_${{ matrix.job_id }}.yml
           if [ $code == 6 ]
           then
             code=0
           fi
           exit "$code"
+      - uses: actions/upload-artifact@v3
+        if: ${{ always() }} 
+        with:
+          name: my-artifact
+          path: artifact_${{ matrix.job_id }}.yml

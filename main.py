@@ -115,6 +115,11 @@ class MatrixGenerator:
 
             await asyncio.gather(*tasks)
 
+        job_id = 0
+        for p in res:
+            p["job_id"] = job_id
+            job_id += 1
+
         linux = []
         for p in res:
             for distro in { 
