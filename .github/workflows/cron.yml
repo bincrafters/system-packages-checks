@@ -93,7 +93,7 @@ jobs:
       if: ${{ always() }} 
       with:
         name: my-artifact
-        path: artifact_${{ matrix.job_id }}.yml
+        path: artifact_*.yml
         
   Linux:
     if: ${{ true }}
@@ -167,7 +167,7 @@ jobs:
         if: ${{ always() }} 
         with:
           name: my-artifact
-          path: artifact_${{ matrix.job_id }}.yml
+          path: artifact_*.yml
 
   Raspberry:
     if: ${{ true }}
@@ -216,7 +216,7 @@ jobs:
       if: ${{ always() }} 
       with:
         name: my-artifact
-        path: artifact_${{ matrix.job_id }}.yml
+        path: artifact_*.yml
 
   Gather_Results:
     name: Gather results
