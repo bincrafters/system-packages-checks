@@ -194,6 +194,7 @@ jobs:
       with:
         image_additional_mb: 1024
         shell: bash
+        copy_artifact_path: "artifact_*.yml"
         commands: |
           export CONAN_SYSREQUIRES_MODE=enabled
           export CONAN_SYSREQUIRES_SUDO=0
