@@ -152,11 +152,14 @@ jobs:
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
-          echo job_id: ${{ matrix.job_id }} > artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
-          echo package: ${{ matrix.package }} >> artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
-          echo pr: ${{ matrix.pr }} >> artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
-          echo distro: ${{ matrix.distro }} >> artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
-          echo res: $code >> artifact_${{ matrix.distro }}_${{ matrix.job_id }}.yml
+          distro=${{ matrix.distro }}
+          distro=${distro////_}
+          distro=${distro//:/_}
+          echo job_id: ${{ matrix.job_id }} > artifact_$distro_${{ matrix.job_id }}.yml
+          echo package: ${{ matrix.package }} >> artifact_$distro_${{ matrix.job_id }}.yml
+          echo pr: ${{ matrix.pr }} >> artifact_$distro_${{ matrix.job_id }}.yml
+          echo distro: "${{ matrix.distro }}" >> artifact_$distro_${{ matrix.job_id }}.yml
+          echo res: $code >> artifact_$distro_${{ matrix.job_id }}.yml
           if [ $code == 6 ]
           then
             code=0
