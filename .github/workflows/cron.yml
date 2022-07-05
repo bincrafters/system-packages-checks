@@ -89,11 +89,11 @@ jobs:
             code=0
           fi
           exit "$code"
-      - uses: actions/upload-artifact@v3
-        if: ${{ always() }} 
-        with:
-          name: my-artifact
-          path: artifact_${{ matrix.job_id }}.yml
+    - uses: actions/upload-artifact@v3
+      if: ${{ always() }} 
+      with:
+        name: my-artifact
+        path: artifact_${{ matrix.job_id }}.yml
         
   Linux:
     if: ${{ true }}
@@ -212,8 +212,18 @@ jobs:
             code=0
           fi
           exit "$code"
-      - uses: actions/upload-artifact@v3
-        if: ${{ always() }} 
+    - uses: actions/upload-artifact@v3
+      if: ${{ always() }} 
+      with:
+        name: my-artifact
+        path: artifact_${{ matrix.job_id }}.yml
+
+  Gather_Results:
+    name: Gather results
+    needs: [FreeBSD, Linux, Raspberry]
+    runs-on: ubuntu-latest
+    if: ${{ always() }} 
+    steps:
+      - uses: actions/download-artifact@v3
         with:
           name: my-artifact
-          path: artifact_${{ matrix.job_id }}.yml
