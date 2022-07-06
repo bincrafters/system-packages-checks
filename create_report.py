@@ -37,8 +37,9 @@ def createReport():
     os.chdir("pages")
     os.makedirs("pr", exist_ok=True)
     os.makedirs("_includes", exist_ok=True)
+    url = "/".join([os.getenv('GITHUB_SERVER_URL'), os.getenv('GITHUB_REPOSITORY'), 'actions', 'runs', os.getenv('GITHUB_RUN_ID')])
     with open("_includes/generation_date.md", "w") as text_file:
-        text_file.write(f"page generated on {datetime.now(timezone.utc)}")
+        text_file.write(f"page generated on {datetime.now(timezone.utc)} during [this run]({url})")
     for pr in res:
         if pr == 0:
             md = "\n# master\n\n"
