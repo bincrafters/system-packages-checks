@@ -234,3 +234,20 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: my-artifact
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.8"
+
+      - name: Generate web page
+        run: |
+          mkdir pages
+          cd pages
+          python ../create_report.py
+          
+      - name: Deploy 
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: pages # The folder the action should deploy.
+          clean: true
