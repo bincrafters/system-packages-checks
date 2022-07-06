@@ -79,11 +79,12 @@ jobs:
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
-          echo job_id: ${{ matrix.job_id }} > artifact_FreeBSD_${{ matrix.job_id }}.yml
-          echo package: ${{ matrix.package }} >> artifact_FreeBSD_${{ matrix.job_id }}.yml
-          echo pr: ${{ matrix.pr }} >> artifact_FreeBSD_${{ matrix.job_id }}.yml
-          echo distro: FreeBSD >> artifact_FreeBSD_${{ matrix.job_id }}.yml
-          echo res: $code >> artifact_FreeBSD_${{ matrix.job_id }}.yml
+          filename=artifact_FreeBSD_${{ matrix.job_id }}.yml
+          echo job_id: ${{ matrix.job_id }} > ${filename}
+          echo package: ${{ matrix.package }} >> ${filename}
+          echo pr: ${{ matrix.pr }} >> ${filename}
+          echo distro: FreeBSD >> ${filename}
+          echo res: $code >> ${filename}
           if [ $code == 6 ]
           then
             code=0
@@ -155,11 +156,12 @@ jobs:
           distro=${{ matrix.distro }}
           distro=${distro////_}
           distro=${distro//:/_}
-          echo job_id: ${{ matrix.job_id }} > artifact_${distro}_${{ matrix.job_id }}.yml
-          echo package: ${{ matrix.package }} >> artifact_${distro}${{ matrix.job_id }}.yml
-          echo pr: ${{ matrix.pr }} >> artifact_${distro}${{ matrix.job_id }}.yml
-          echo distro: "${{ matrix.distro }}" >> artifact_${distro}${{ matrix.job_id }}.yml
-          echo res: $code >> artifact_${distro}${{ matrix.job_id }}.yml
+          filename=artifact_${distro}_${{ matrix.job_id }}.yml
+          echo job_id: ${{ matrix.job_id }} > ${filename}
+          echo package: ${{ matrix.package }} >> ${filename}
+          echo pr: ${{ matrix.pr }} >> ${filename}
+          echo distro: "${{ matrix.distro }}" >> ${filename}
+          echo res: $code >> ${filename}
           if [ $code == 6 ]
           then
             code=0
@@ -206,11 +208,12 @@ jobs:
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
-          echo job_id: ${{ matrix.job_id }} > artifact_Raspberry_${{ matrix.job_id }}.yml
-          echo package: ${{ matrix.package }} >> artifact_Raspberry_${{ matrix.job_id }}.yml
-          echo pr: ${{ matrix.pr }} >> artifact_Raspberry_${{ matrix.job_id }}.yml
-          echo distro: Raspberry >> artifact_Raspberry_${{ matrix.job_id }}.yml
-          echo res: $code >> artifact_Raspberry_${{ matrix.job_id }}.yml
+          filename=artifact_Raspberry_${{ matrix.job_id }}.yml
+          echo job_id: ${{ matrix.job_id }} > ${filename}
+          echo package: ${{ matrix.package }} >> ${filename}
+          echo pr: ${{ matrix.pr }} >> ${filename}
+          echo distro: Raspberry >> ${filename}
+          echo res: $code >> ${filename}
           if [ $code == 6 ]
           then
             code=0
