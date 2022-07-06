@@ -65,6 +65,8 @@ def createReport():
                     md += " Not run |"
                 elif res[pr][package][d] == 0:
                     md += " Success |"
+                elif res[pr][package][d] == 6:
+                    md += " Not supported |"
                 else:
                     md += f" ***Failure {res[pr][package][d]}*** |"
             md += "\n"
