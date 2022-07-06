@@ -11,10 +11,10 @@ def append_to_file(content, filename):
 
 def createReport():
     res = dict()
-    for file_name in os.listdir(".."):
+    for file_name in os.listdir():
         if not file_name.startswith('artifact_'):
             continue
-        with open(f"../{file_name}", 'rt') as f:
+        with open(file_name, 'rt') as f:
             d = yaml.safe_load(f)
 
         if d['pr'] not in res:
@@ -33,6 +33,8 @@ def createReport():
                 if d not in distros:
                     distros.append(d)
 
+    os.makedirs("pages", exist_ok=True)
+    os.chdir("pages")
     os.makedirs("pr", exist_ok=True)
     os.makedirs("_includes", exist_ok=True)
     with open("_includes/generation_date.md", "w") as text_file:

@@ -241,9 +241,7 @@ jobs:
 
       - name: Generate web page
         run: |
-          mkdir pages
-          cd pages
-          python ../create_report.py
+          python create_report.py
           
       - name: Deploy 
         uses: JamesIves/github-pages-deploy-action@v4
