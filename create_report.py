@@ -32,6 +32,7 @@ def createReport():
             for d in res[pr][package]:
                 if d not in distros:
                     distros.append(d)
+    distros.sort()
 
     os.makedirs("pages", exist_ok=True)
     os.chdir("pages")
@@ -40,31 +41,32 @@ def createReport():
     url = "/".join([os.getenv('GITHUB_SERVER_URL'), os.getenv('GITHUB_REPOSITORY'), 'actions', 'runs', os.getenv('GITHUB_RUN_ID')])
     with open("_includes/generation_date.md", "w") as text_file:
         text_file.write(f"page generated on {datetime.now(timezone.utc)} during [this run]({url})")
-    for pr in res:
+    for pr in sorted(res):
         if pr == 0:
             md = "\n# master\n\n"
         else:
             md = f"\n# [#{pr}](https://github.com/conan-io/conan-center-index/pull/{pr})\n\n"
 
-        md += "| package |"
-        for distro in distros:
-            md += f" {distro} |"
+        packages = sorted(res[pr])
+        md += "|  |"
+        for package in packages:
+            md += f" {package} |"
         md += "\n"
 
         md += "| - |"
-        for distro in distros:
+        for package in packages:
             md += " - |"
         md += "\n"
 
-        for package in res[pr]:
-            md += f"| {package} |"
-            for d in distros:
+        for d in distros:
+            md += f"| {d} |"
+            for package in packages:
                 if d not in res[pr][package]:
                     md += " Not run |"
                 elif res[pr][package][d] == 0:
                     md += " Success |"
                 else:
-                    md += f" Failure {res[pr][package][d]} |"
+                    md += f" ***Failure {res[pr][package][d]}*** |"
             md += "\n"
         md += "\n"
         print(md)
