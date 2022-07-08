@@ -6,7 +6,9 @@ def append_to_file(content, filename):
     file_exists = os.path.isfile(filename)
     with open(filename, "a") as text_file:
         if not file_exists:
-            text_file.write("{% include generation_date.md %}\n\n")
+            url = "/".join([os.getenv('GITHUB_SERVER_URL'), os.getenv('GITHUB_REPOSITORY'), 'actions', 'runs', os.getenv('GITHUB_RUN_ID')])
+            text_file.write("page generated on {{ site.time | date_to_xmlschema }} ")
+            text_file.write(f"during [this run]({url})\n\n")
         text_file.write(content)
 
 def createReport():
@@ -38,9 +40,6 @@ def createReport():
     os.chdir("pages")
     os.makedirs("pr", exist_ok=True)
     os.makedirs("_includes", exist_ok=True)
-    url = "/".join([os.getenv('GITHUB_SERVER_URL'), os.getenv('GITHUB_REPOSITORY'), 'actions', 'runs', os.getenv('GITHUB_RUN_ID')])
-    with open("_includes/generation_date.md", "w") as text_file:
-        text_file.write(f"page generated on {datetime.now(timezone.utc)} during [this run]({url})")
     for pr in sorted(res):
         if pr == 0:
             md = "\n# master\n\n"
