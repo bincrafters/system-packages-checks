@@ -75,11 +75,10 @@ jobs:
         usesh: true
         prepare: pkg install -y cmake py39-pip py39-sqlite3 sudo pkgconf
         run: |
-          python3.9 -m pip install conan
-          conan config set tools.system.package_manager:mode=install
+          python3.9 -m pip install conan distro
           code=0
           set +o pipefail
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ -c tools.system.package_manager:mode=install || code=$?
           filename=artifact_FreeBSD_${{ matrix.job_id }}.yml
           echo job_id: ${{ matrix.job_id }} > ${filename}
           echo package: ${{ matrix.package }} >> ${filename}
@@ -133,7 +132,7 @@ jobs:
           esac
         
       - name: install conan
-        run: python3 -m pip install --upgrade pip && python3 -m pip install conan --ignore-installed
+        run: python3 -m pip install --upgrade pip && python3 -m pip install conan distro --ignore-installed
         
       - name: Checkout CCI
         uses: actions/checkout@v2
@@ -150,11 +149,10 @@ jobs:
         run: |
           conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config 
           conan install cmake/3.18.2@ -g virtualrunenv -b missing -s compiler.version=5 -s compiler.cppstd=11
-          conan config set tools.system.package_manager:mode=install
           source ./activate_run.sh
           code=0
           set +o pipefail
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ -c tools.system.package_manager:mode=install || code=$?
           distro=${{ matrix.distro }}
           distro=${distro////_}
           distro=${distro//:/_}
@@ -205,12 +203,11 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           export PIP_ONLY_BINARY=cmake # workaround scikit-build/cmake-python-distributions#192
           apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make
-          python3 -m pip install --upgrade pip && python3 -m pip install conan --ignore-installed
+          python3 -m pip install --upgrade pip && python3 -m pip install conan distro --ignore-installed
           python3 -m pip install cmake -Iv cmake==3.22.0
-          conan config set tools.system.package_manager:mode=install
           code=0
           set +o pipefail
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ -c tools.system.package_manager:mode=install || code=$?
           filename=artifact_Raspberry_${{ matrix.job_id }}.yml
           echo job_id: ${{ matrix.job_id }} > ${filename}
           echo package: ${{ matrix.package }} >> ${filename}
