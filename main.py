@@ -80,7 +80,7 @@ class MatrixGenerator:
             async def _add_package(package, repo, ref, pr = "0"):
                 refs = package.split("/")
                 package = refs[0]
-                modified_folder = refs[1] if len(ref) >= 2 else ""
+                modified_folder = refs[1] if len(refs) >= 2 else ""
                 async with session.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/config.yml" % (repo, ref, package)) as r:
                     if r.status  == 404:
                         folder = "system"
