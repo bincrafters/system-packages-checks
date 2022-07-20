@@ -56,7 +56,9 @@ class MatrixGenerator:
                             return
                         for line in diff.split("\n"):
                             if line.startswith("+++ b/recipes/") or line.startswith("--- a/recipes/"):
-                                self.prs[pr]["libs"].add(line.split("/")[2])
+                                parts = line.split("/")
+                                if len(parts) >= 5:
+                                    self.prs[pr]["libs"].add("%s/%s" % (parts[2], parts[3]))
                 await asyncio.gather(*[asyncio.create_task(_populate_diff(pr)) for pr in self.prs])
 
         loop = asyncio.get_event_loop()
@@ -76,9 +78,14 @@ class MatrixGenerator:
         async with aiohttp.ClientSession() as session:
 
             async def _add_package(package, repo, ref, pr = "0"):
+                refs = package.split("/")
+                package = refs[0]
+                modified_folder = refs[1] if len(ref) >= 2 else ""
                 async with session.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/config.yml" % (repo, ref, package)) as r:
                     if r.status  == 404:
                         folder = "system"
+                        if modified_folder and modified_folder != folder:
+                            return
                         async with session.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/%s/conanfile.py" % (repo, ref, package, folder)) as r:
                             if r.status  == 404:
                                 print("no system folder found for package %s in pr %s %s" % (package, pr, r.url))
@@ -94,6 +101,8 @@ class MatrixGenerator:
                         if "system" not in config["versions"]:
                             return
                         folder = config["versions"]["system"]["folder"]
+                        if modified_folder and modified_folder != folder:
+                            return
                 res.append({
                         'package': package,
                         'repo': repo,
