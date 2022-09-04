@@ -138,8 +138,6 @@ class MatrixGenerator:
                             "debian:10",
                             "ubuntu:kinetic",
                             "ubuntu:jammy",
-                            "ubuntu:impish",
-                            "ubuntu:hirsute",
                             "ubuntu:focal",
                             "ubuntu:bionic",
                             "almalinux:8.5",
