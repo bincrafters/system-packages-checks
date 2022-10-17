@@ -31,7 +31,7 @@ jobs:
         with:
           repository: conan-io/conan-center-index
           path: CCI
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
       - run: "python3 -m pip install pyyaml requests aiohttp"
@@ -232,7 +232,7 @@ jobs:
     if: ${{ always() }} 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
       - run: "python -m pip install pyyaml"
