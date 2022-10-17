@@ -41,11 +41,11 @@ jobs:
           python3 main.py
           MATRIXLINUX=$(cat matrixLinux.yml)
           echo "${MATRIXLINUX}"
-          echo "name=matrixLinux::${MATRIXLINUX}" >> $GITHUB_ENV
+          echo "name=matrixLinux::${MATRIXLINUX}" >> $GITHUB_OUTPUT
           
           MATRIXBSD=$(cat matrixBSD.yml)
           echo "${MATRIXBSD}"
-          echo "name=matrixBSD::${MATRIXBSD}" >> $GITHUB_ENV
+          echo "name=matrixBSD::${MATRIXBSD}" >> $GITHUB_OUTPUT
   
   FreeBSD:
     if: ${{ true }}
