@@ -245,6 +245,8 @@ jobs:
         run: |
           python create_report.py
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
