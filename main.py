@@ -10,8 +10,6 @@ class MatrixGenerator:
     owner = "conan-io"
     repo = "conan-center-index"
 
-    dry_run = True
-
     def __init__(self, token=None, user=None, pw=None):
         self.session = requests.session()
         self.session.headers = {}
@@ -29,13 +27,14 @@ class MatrixGenerator:
 
         page = 1
         while True:
-            r = self._make_request("GET", f"/repos/{self.owner}/{self.repo}/pulls", params={
+            r = self.session.request("GET", f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls", params={
                 "state": "open",
                 "sort": "created",
                 "direction": "desc",
                 "per_page": 100,
                 "page": str(page)
             })
+            r.raise_for_status()
             results = r.json()
             for p in results:
                 self.prs[int(p["number"])] = p
@@ -63,14 +62,6 @@ class MatrixGenerator:
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(_populate_diffs())
-
-    def _make_request(self, method, url, **kwargs):
-        if self.dry_run and method in ["PATCH", "POST"]:
-            return
-
-        r = self.session.request(method, "https://api.github.com" + url, **kwargs)
-        r.raise_for_status()
-        return r
 
     async def generate_matrix(self):
         res = []
