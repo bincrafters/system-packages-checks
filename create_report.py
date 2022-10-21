@@ -1,3 +1,5 @@
+#pylint: disable = line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring, invalid-name, too-many-lines, too-many-branches, no-name-in-module
+
 import os
 import yaml
 
@@ -28,9 +30,9 @@ def createReport():
 
     distros = []
 
-    for pr in res:
-        for package in res[pr]:
-            for d in res[pr][package]:
+    for pr in res.values():
+        for package in pr.values():
+            for d in package:
                 if d not in distros:
                     distros.append(d)
     distros.sort()

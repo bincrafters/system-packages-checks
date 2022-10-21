@@ -1,12 +1,14 @@
+#pylint: disable = line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring, invalid-name, too-many-lines, too-many-branches, no-name-in-module
+
 import os
 import json
 import copy
 import urllib.parse
 import asyncio
+import logging
 import aiohttp
 import yaml
 import requests
-import logging
 
 class MatrixGenerator:
     owner = "conan-io"
@@ -105,7 +107,7 @@ class MatrixGenerator:
                     })
             tasks = []
             for package in  os.listdir("CCI/recipes"):
-                tasks.append(asyncio.create_task(_add_package(package, '%s/%s' % (self.owner, self.repo), 'master')))
+                tasks.append(asyncio.create_task(_add_package(package, f'{self.owner}/{self.repo}', 'master')))
 
             for pr in self.prs.values():
                 pr_number = str(pr["number"])
