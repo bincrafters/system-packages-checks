@@ -1,10 +1,12 @@
 import os
 import json
-import yaml
-import requests
-import asyncio, aiohttp
 import copy
 import urllib.parse
+import asyncio
+import aiohttp
+import yaml
+import requests
+import logging
 
 class MatrixGenerator:
     owner = "conan-io"
@@ -14,7 +16,7 @@ class MatrixGenerator:
         self.session = requests.session()
         self.session.headers = {}
         if token:
-            self.session.headers["Authorization"] = "token %s" % token
+            self.session.headers["Authorization"] = f"token {token}"
 
         self.session.headers["Accept"] = "application/vnd.github.v3+json"
         self.session.headers["User-Agent"] = "request"
@@ -51,13 +53,13 @@ class MatrixGenerator:
                         try:
                             diff = await r.text()
                         except UnicodeDecodeError:
-                            print("error when decoding diff at %s" % self.prs[pr]["diff_url"])
+                            logging.error("error when decoding diff at %s", self.prs[pr]["diff_url"])
                             return
                         for line in diff.split("\n"):
                             if line.startswith("+++ b/recipes/") or line.startswith("--- a/recipes/"):
                                 parts = line.split("/")
                                 if len(parts) >= 5:
-                                    self.prs[pr]["libs"].add("%s/%s" % (parts[2], parts[3]))
+                                    self.prs[pr]["libs"].add(f"{parts[2]}/{parts[3]}")
                 await asyncio.gather(*[asyncio.create_task(_populate_diff(pr)) for pr in self.prs])
 
         loop = asyncio.get_event_loop()
@@ -65,21 +67,21 @@ class MatrixGenerator:
 
     async def generate_matrix(self):
         res = []
-                
+
         async with aiohttp.ClientSession() as session:
 
             async def _add_package(package, repo, ref, pr = "0"):
                 refs = package.split("/")
                 package = refs[0]
                 modified_folder = refs[1] if len(refs) >= 2 else ""
-                async with session.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/config.yml" % (repo, ref, package)) as r:
+                async with session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/config.yml") as r:
                     if r.status  == 404:
                         folder = "system"
                         if modified_folder and modified_folder != folder:
                             return
-                        async with session.get("https://raw.githubusercontent.com/%s/%s/recipes/%s/%s/conanfile.py" % (repo, ref, package, folder)) as r:
+                        async with session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/{folder}/conanfile.py") as r:
                             if r.status  == 404:
-                                print("no system folder found for package %s in pr %s %s" % (package, pr, r.url))
+                                logging.warning("no system folder found for package %s in pr %s %s", package, pr, r.url)
                                 return
                             r.raise_for_status()
                     else:
@@ -87,7 +89,7 @@ class MatrixGenerator:
                         try:
                             config = yaml.safe_load(await r.text())
                         except yaml.YAMLError as exc:
-                            print("Error in configuration file:%s, %s, %s, %s, %s" % (package, repo, ref, pr, exc))
+                            logging.warning("Error in configuration file:%s, %s, %s, %s, %s", package, repo, ref, pr, exc)
                             return
                         if "system" not in config["versions"]:
                             return
@@ -109,7 +111,7 @@ class MatrixGenerator:
                 pr_number = str(pr["number"])
                 for package in pr['libs']:
                     if not pr["head"]["repo"]:
-                        print("no repo detected for pr #%s" % pr_number)
+                        logging.warning("no repo detected for pr #%s", pr_number)
                         continue
                     tasks.append(asyncio.create_task(_add_package(package, pr["head"]["repo"]["full_name"], urllib.parse.quote_plus(pr["head"]["ref"]), pr_number)))
 
@@ -122,7 +124,7 @@ class MatrixGenerator:
 
         linux = []
         for p in res:
-            for distro in { 
+            for distro in [
                             "opensuse/tumbleweed",
                             "opensuse/leap:15.2",
                             "debian:11",
@@ -132,26 +134,26 @@ class MatrixGenerator:
                             "ubuntu:focal",
                             "ubuntu:bionic",
                             "almalinux:8.5",
-                            "archlinux",                
+                            "archlinux",
                             "fedora:36",
                             "fedora:35",
                             "fedora:34",
                             "fedora:33",
                             "quay.io/centos/centos:stream8",
                             # "quay.io/centos/centos:stream9", # Error: Unable to find a match: libXvMC-devel
-                            }:
+            ]:
                 config = copy.deepcopy(p)
                 config['distro'] = distro
                 linux.append(config)
 
 
-        with open("matrixLinux.yml", "w") as f:
+        with open("matrixLinux.yml", "w", encoding="latin_1") as f:
             json.dump({"include": linux}, f)
 
 
-        with open("matrixBSD.yml", "w") as f:
+        with open("matrixBSD.yml", "w", encoding="latin_1") as f:
             json.dump({"include": res}, f)
-                
+
 
 
 def main():

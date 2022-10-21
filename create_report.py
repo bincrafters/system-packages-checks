@@ -1,10 +1,9 @@
 import os
 import yaml
-from datetime import datetime, timezone
 
 def append_to_file(content, filename):
     file_exists = os.path.isfile(filename)
-    with open(filename, "a") as text_file:
+    with open(filename, "a", encoding="latin_1") as text_file:
         if not file_exists:
             url = "/".join([os.getenv('GITHUB_SERVER_URL'), os.getenv('GITHUB_REPOSITORY'), 'actions', 'runs', os.getenv('GITHUB_RUN_ID')])
             text_file.write("page generated on {{ site.time | date_to_xmlschema }} ")
@@ -12,22 +11,22 @@ def append_to_file(content, filename):
         text_file.write(content)
 
 def createReport():
-    res = dict()
+    res = {}
     for file_name in os.listdir():
         if not file_name.startswith('artifact_'):
             continue
-        with open(file_name, 'rt') as f:
+        with open(file_name, 'rt', encoding="latin_1") as f:
             d = yaml.safe_load(f)
 
         if d['pr'] not in res:
-            res[d['pr']] = dict()
+            res[d['pr']] = {}
 
         if d['package'] not in res[d['pr']]:
-            res[d['pr']][d['package']] = dict()
+            res[d['pr']][d['package']] = {}
 
         res[d['pr']][d['package']][d['distro']] = d['res']
 
-    distros = list()
+    distros = []
 
     for pr in res:
         for package in res[pr]:
@@ -71,7 +70,7 @@ def createReport():
             md += "\n"
         md += "\n"
         print(md)
-        with open(f"_includes/{pr}.md", "w") as text_file:
+        with open(f"_includes/{pr}.md", "w", encoding="latin_1") as text_file:
             text_file.write(md)
         md = "{% include " + str(pr) + ".md %}\n"
         append_to_file(md, f"pr/{pr}.md")
