@@ -1,4 +1,4 @@
-#pylint: disable = line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring, invalid-name, too-many-lines, too-many-branches, no-name-in-module
+#pylint: disable = line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring, invalid-name, too-many-lines, too-many-branches, no-name-in-module, too-few-public-methods
 
 import os
 import json
