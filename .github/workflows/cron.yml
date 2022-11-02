@@ -9,12 +9,12 @@ on:
     - cron:  '0 10 * * *'
   push:
     branches:
-      - '**' 
+      - '**'
   workflow_dispatch: {}
 
 
 env:
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -25,7 +25,7 @@ jobs:
       matrixLinux: ${{ steps.set-matrix.outputs.matrixLinux }}
       matrixBSD: ${{ steps.set-matrix.outputs.matrixBSD }}
     steps:
-      - uses: actions/checkout@v3        
+      - uses: actions/checkout@v3
       - name: Checkout CCI
         uses: actions/checkout@v3
         with:
@@ -43,18 +43,18 @@ jobs:
           MATRIXLINUX=$(cat matrixLinux.yml)
           echo "${MATRIXLINUX}"
           echo "matrixLinux=${MATRIXLINUX}" >> $GITHUB_OUTPUT
-          
+
           MATRIXBSD=$(cat matrixBSD.yml)
           echo "${MATRIXBSD}"
           echo "matrixBSD=${MATRIXBSD}" >> $GITHUB_OUTPUT
-  
+
   FreeBSD:
     if: ${{ true }}
     needs: generate-matrix
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.generate-matrix.outputs.matrixBSD)}}
-      
+
     runs-on: macos-12
 
     env:
@@ -92,18 +92,18 @@ jobs:
           fi
           exit "$code"
     - uses: actions/upload-artifact@v3
-      if: ${{ always() }} 
+      if: ${{ always() }}
       with:
         name: my-artifact
         path: artifact_*.yml
-        
+
   Linux:
     if: ${{ true }}
     needs: generate-matrix
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.generate-matrix.outputs.matrixLinux)}}
-      
+
     runs-on: ubuntu-20.04
     container: ${{ matrix.distro }}
 
@@ -131,10 +131,10 @@ jobs:
             fedora*)
               dnf -y install python3 python3-wheel python3-pip pkgconf-pkg-config gcc-c++ make;;
           esac
-        
+
       - name: install conan
         run: python3 -m pip install --upgrade pip && python3 -m pip install conan distro --ignore-installed
-        
+
       - name: Checkout CCI
         uses: actions/checkout@v3
         with:
@@ -148,7 +148,7 @@ jobs:
           CONAN_SYSREQUIRES_SUDO: 0
           DEBIAN_FRONTEND: noninteractive
         run: |
-          conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config 
+          conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config
           conan install cmake/3.18.2@ -g virtualrunenv -b missing -s compiler.version=5 -s compiler.cppstd=11
           source ./activate_run.sh
           code=0
@@ -168,9 +168,9 @@ jobs:
             code=0
           fi
           exit "$code"
-          
+
       - uses: actions/upload-artifact@v3
-        if: ${{ always() }} 
+        if: ${{ always() }}
         with:
           name: my-artifact
           path: artifact_*.yml
@@ -181,7 +181,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.generate-matrix.outputs.matrixBSD)}}
-      
+
     runs-on: ubuntu-latest
 
     steps:
@@ -221,7 +221,7 @@ jobs:
           fi
           exit "$code"
     - uses: actions/upload-artifact@v3
-      if: ${{ always() }} 
+      if: ${{ always() }}
       with:
         name: my-artifact
         path: artifact_*.yml
@@ -230,7 +230,7 @@ jobs:
     name: Gather results
     needs: [FreeBSD, Linux, Raspberry]
     runs-on: ubuntu-latest
-    if: ${{ always() }} 
+    if: ${{ always() }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -242,7 +242,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: my-artifact
-          
+
       - name: Generate web page
         run: |
           python create_report.py
@@ -259,7 +259,7 @@ jobs:
 
   # Deployment job
   deploy:
-    if: ${{ always() }} 
+    if: ${{ always() }}
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
       pages: write      # to deploy to Pages
