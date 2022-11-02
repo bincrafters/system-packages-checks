@@ -1,19 +1,26 @@
-#pylint: disable = line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring, invalid-name, too-many-lines, too-many-branches, no-name-in-module, too-few-public-methods
+# pylint: disable = invalid-name, too-many-branches
 
 import os
+from typing import Dict, List
 import yaml
 
-def append_to_file(content, filename):
+
+def append_to_file(content: str, filename: str) -> None:
     file_exists = os.path.isfile(filename)
     with open(filename, "a", encoding="latin_1") as text_file:
         if not file_exists:
-            url = "/".join([os.getenv('GITHUB_SERVER_URL'), os.getenv('GITHUB_REPOSITORY'), 'actions', 'runs', os.getenv('GITHUB_RUN_ID')])
+            url = "/".join([os.getenv('GITHUB_SERVER_URL', ''),
+                            os.getenv('GITHUB_REPOSITORY', ''),
+                            'actions',
+                            'runs',
+                            os.getenv('GITHUB_RUN_ID', '')])
             text_file.write("page generated on {{ site.time | date_to_xmlschema }} ")
             text_file.write(f"during [this run]({url})\n\n")
         text_file.write(content)
 
-def createReport():
-    res = {}
+
+def createReport() -> None: # noqa: MC0001
+    res: Dict[str, Dict[str, Dict[str, List[str]]]] = {}
     for file_name in os.listdir():
         if not file_name.startswith('artifact_'):
             continue
@@ -30,9 +37,9 @@ def createReport():
 
     distros = []
 
-    for pr in res.values():
-        for package in pr.values():
-            for d in package:
+    for pr_ in res.values():
+        for package_ in pr_.values():
+            for d in package_:
                 if d not in distros:
                     distros.append(d)
     distros.sort()
@@ -49,13 +56,11 @@ def createReport():
 
         packages = sorted(res[pr])
         md += "|  |"
-        for package in packages:
-            md += f" {package} |"
+        md += "".join(f" {package} |" for package in packages)
         md += "\n"
 
         md += "| - |"
-        for package in packages:
-            md += " - |"
+        md += "".join(" - |" for package in packages)
         md += "\n"
 
         for d in distros:

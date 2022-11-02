@@ -1,4 +1,4 @@
-#pylint: disable = line-too-long, missing-module-docstring, missing-class-docstring, missing-function-docstring, invalid-name, too-many-lines, too-many-branches, no-name-in-module, too-few-public-methods
+# pylint: disable = invalid-name, too-few-public-methods
 
 import os
 import json
@@ -6,17 +6,20 @@ import copy
 import urllib.parse
 import asyncio
 import logging
+from datetime import datetime
+from typing import Set, Dict, List
 import aiohttp
 import yaml
 import requests
 
-class MatrixGenerator:
-    owner = "conan-io"
-    repo = "conan-center-index"
 
-    def __init__(self, token=None, user=None, pw=None):
+class MatrixGenerator:
+    owner: str = "conan-io"
+    repo: str = "conan-center-index"
+    dry_run: bool = False
+
+    def __init__(self, token:str = None, user:str = None, pw:str = None): # noqa: MC0001
         self.session = requests.session()
-        self.session.headers = {}
         if token:
             self.session.headers["Authorization"] = f"token {token}"
 
@@ -31,13 +34,12 @@ class MatrixGenerator:
 
         page = 1
         while True:
-            r = self.session.request("GET", f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls", params={
-                "state": "open",
-                "sort": "created",
-                "direction": "desc",
-                "per_page": 100,
-                "page": str(page)
-            })
+            r = self._make_request("GET", f"/repos/{self.owner}/{self.repo}/pulls",
+                                   params={"state": "open",
+                                           "sort": "created",
+                                           "direction": "desc",
+                                           "per_page": 100,
+                                           "page": str(page)})
             r.raise_for_status()
             results = r.json()
             for p in results:
@@ -46,43 +48,46 @@ class MatrixGenerator:
             if not results:
                 break
 
-        async def _populate_diffs():
-            async with aiohttp.ClientSession() as session:
-                async def _populate_diff(pr):
-                    async with session.get(self.prs[pr]["diff_url"]) as r:
-                        r.raise_for_status()
-                        self.prs[pr]["libs"] = set()
-                        try:
-                            diff = await r.text()
-                        except UnicodeDecodeError:
-                            logging.error("error when decoding diff at %s", self.prs[pr]["diff_url"])
-                            return
-                        for line in diff.split("\n"):
-                            if line.startswith("+++ b/recipes/") or line.startswith("--- a/recipes/"):
-                                parts = line.split("/")
-                                if len(parts) >= 5:
-                                    self.prs[pr]["libs"].add(f"{parts[2]}/{parts[3]}")
-                await asyncio.gather(*[asyncio.create_task(_populate_diff(pr)) for pr in self.prs])
+        for pr_number, pr in self.prs.items():
+            pr["libs"] = self._get_modified_libs_for_pr(pr_number)
 
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(_populate_diffs())
+    def _get_modified_libs_for_pr(self, pr: int) -> Set[str]:
+        res: Set[str] = set()
+        for file in self._make_request("GET", f"/repos/{self.owner}/{self.repo}/pulls/{pr}/files").json():
+            parts = file['filename'].split("/")
+            if len(parts) >= 4 and parts[0] == "recipes":
+                res.add(f"{parts[1]}/{parts[2]}")
+        return res
 
-    async def generate_matrix(self):
-        res = []
+    def _make_request(self, method: str, url: str, **kwargs) -> requests.Response:
+        if self.dry_run and method in ["PATCH", "POST"]:
+            return requests.Response()
+
+        r = self.session.request(method, f"https://api.github.com{url}", **kwargs)
+        r.raise_for_status()
+        if int(r.headers["X-RateLimit-Remaining"]) < 10:
+            logging.warning("%s/%s github api call used, remaining %s until %s",
+                            r.headers["X-Ratelimit-Used"], r.headers["X-RateLimit-Limit"], r.headers["X-RateLimit-Remaining"],
+                            datetime.fromtimestamp(int(r.headers["X-Ratelimit-Reset"])))
+        return r
+
+
+    async def generate_matrix(self) -> None: # noqa: MC0001
+        res: List[Dict[str, str]] = []
 
         async with aiohttp.ClientSession() as session:
 
-            async def _add_package(package, repo, ref, pr = "0"):
+            async def _add_package(package: str, repo: str, ref: str, pr: str = "0") -> None:
                 refs = package.split("/")
                 package = refs[0]
                 modified_folder = refs[1] if len(refs) >= 2 else ""
                 async with session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/config.yml") as r:
-                    if r.status  == 404:
+                    if r.status == 404:
                         folder = "system"
                         if modified_folder and modified_folder != folder:
                             return
                         async with session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/{folder}/conanfile.py") as r:
-                            if r.status  == 404:
+                            if r.status == 404:
                                 logging.warning("no system folder found for package %s in pr %s %s", package, pr, r.url)
                                 return
                             r.raise_for_status()
@@ -98,15 +103,14 @@ class MatrixGenerator:
                         folder = config["versions"]["system"]["folder"]
                         if modified_folder and modified_folder != folder:
                             return
-                res.append({
-                        'package': package,
-                        'repo': repo,
-                        'ref': ref,
-                        'folder': folder,
-                        'pr': pr,
-                    })
+                res.append({'package': package,
+                            'repo': repo,
+                            'ref': ref,
+                            'folder': folder,
+                            'pr': pr,
+                            })
             tasks = []
-            for package in  os.listdir("CCI/recipes"):
+            for package in os.listdir("CCI/recipes"):
                 tasks.append(asyncio.create_task(_add_package(package, f'{self.owner}/{self.repo}', 'master')))
 
             for pr in self.prs.values():
@@ -121,44 +125,40 @@ class MatrixGenerator:
 
         job_id = 0
         for p in res:
-            p["job_id"] = job_id
+            p["job_id"] = str(job_id)
             job_id += 1
 
         linux = []
         for p in res:
-            for distro in [
-                            "opensuse/tumbleweed",
-                            "opensuse/leap:15.2",
-                            "debian:11",
-                            "debian:10",
-                            "ubuntu:kinetic",
-                            "ubuntu:jammy",
-                            "ubuntu:focal",
-                            "ubuntu:bionic",
-                            "almalinux:8.5",
-                            "archlinux",
-                            "fedora:36",
-                            "fedora:35",
-                            "fedora:34",
-                            "fedora:33",
-                            "quay.io/centos/centos:stream8",
-                            # "quay.io/centos/centos:stream9", # Error: Unable to find a match: libXvMC-devel
-            ]:
+            for distro in ["opensuse/tumbleweed",
+                           "opensuse/leap:15.2",
+                           "debian:11",
+                           "debian:10",
+                           "ubuntu:kinetic",
+                           "ubuntu:jammy",
+                           "ubuntu:focal",
+                           "ubuntu:bionic",
+                           "almalinux:8.5",
+                           "archlinux",
+                           "fedora:36",
+                           "fedora:35",
+                           "fedora:34",
+                           "fedora:33",
+                           "quay.io/centos/centos:stream8",
+                           # "quay.io/centos/centos:stream9", # Error: Unable to find a match: libXvMC-devel
+                           ]:
                 config = copy.deepcopy(p)
                 config['distro'] = distro
                 linux.append(config)
 
-
         with open("matrixLinux.yml", "w", encoding="latin_1") as f:
             json.dump({"include": linux}, f)
-
 
         with open("matrixBSD.yml", "w", encoding="latin_1") as f:
             json.dump({"include": res}, f)
 
 
-
-def main():
+def main() -> None:
     d = MatrixGenerator(token=os.getenv("GH_TOKEN"))
     loop = asyncio.get_event_loop()
     loop.run_until_complete(d.generate_matrix())
