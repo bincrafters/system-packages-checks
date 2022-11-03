@@ -111,7 +111,7 @@ class MatrixGenerator:
                             })
             tasks = []
             for package in os.listdir("CCI/recipes"):
-                tasks.append(asyncio.create_task(_add_package(package, f'{self.owner}/{self.repo}', 'master')))
+                tasks.append(_add_package(package, f'{self.owner}/{self.repo}', 'master'))
 
             for pr in self.prs.values():
                 pr_number = str(pr["number"])
@@ -119,7 +119,7 @@ class MatrixGenerator:
                     if not pr["head"]["repo"]:
                         logging.warning("no repo detected for pr #%s", pr_number)
                         continue
-                    tasks.append(asyncio.create_task(_add_package(package, pr["head"]["repo"]["full_name"], urllib.parse.quote_plus(pr["head"]["ref"]), pr_number)))
+                    tasks.append(_add_package(package, pr["head"]["repo"]["full_name"], urllib.parse.quote_plus(pr["head"]["ref"]), pr_number))
 
             await asyncio.gather(*tasks)
 
