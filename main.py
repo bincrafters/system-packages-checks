@@ -18,7 +18,7 @@ class MatrixGenerator:
     repo: str = "conan-center-index"
     dry_run: bool = False
 
-    def __init__(self, token:str = "", user:str = "", pw:str = ""): # noqa: MC0001
+    def __init__(self, token: str = "", user: str = "", pw: str = ""):  # noqa: MC0001
         self.session = requests.session()
         if token:
             self.session.headers["Authorization"] = f"token {token}"
@@ -71,8 +71,7 @@ class MatrixGenerator:
                             datetime.fromtimestamp(int(r.headers["X-Ratelimit-Reset"])))
         return r
 
-
-    async def generate_matrix(self) -> None: # noqa: MC0001
+    async def generate_matrix(self) -> None:  # noqa: MC0001
         res: List[Dict[str, str]] = []
 
         async with aiohttp.ClientSession() as session:

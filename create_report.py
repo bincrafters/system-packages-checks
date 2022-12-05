@@ -19,7 +19,7 @@ def append_to_file(content: str, filename: str) -> None:
         text_file.write(content)
 
 
-def createReport() -> None: # noqa: MC0001
+def createReport() -> None:  # noqa: MC0001
     res: Dict[str, Dict[str, Dict[str, List[str]]]] = {}
     for file_name in os.listdir():
         if not file_name.startswith('artifact_'):
