@@ -151,7 +151,7 @@ jobs:
         run: |
           conan profile detect
           # conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config
-          conan install --tool-requires cmake/3.25.2@ -g VirtualBuildEnv -s compiler=gcc -s compiler.version=11 -s compiler.libcxx=libstdc++11
+          conan install --tool-requires cmake/3.25.2@ -g VirtualBuildEnv -s:b compiler=gcc -s:b compiler.version=11 -s:b compiler.libcxx=libstdc++11
           source ./conanbuild.sh
           code=0
           set +o pipefail
