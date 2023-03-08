@@ -150,7 +150,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           conan profile detect
-          conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config
+          # conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config
           conan install --tool-requires cmake/3.25.2@ -g VirtualBuildEnv -b missing -s compiler.version=5 -s compiler.cppstd=11
           source ./conanbuild.sh
           code=0
