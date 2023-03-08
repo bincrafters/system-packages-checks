@@ -134,7 +134,7 @@ jobs:
           esac
 
       - name: install conan
-        run: python3 -m pip install --upgrade pip && python3 -m pip install conan distro --ignore-installed
+        run: python3 -m pip install --upgrade pip && python3 -m pip install conan distro cmake --ignore-installed
 
       - name: Checkout CCI
         uses: actions/checkout@v3
@@ -151,8 +151,8 @@ jobs:
         run: |
           conan profile detect
           # conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config
-          conan install --tool-requires cmake/3.25.2@ -g VirtualBuildEnv -s:b compiler=gcc -s:b compiler.version=11 -s:b compiler.libcxx=libstdc++11
-          source ./conanbuild.sh
+          # conan install --tool-requires cmake/3.25.2@ -g VirtualBuildEnv -s:b compiler=gcc -s:b compiler.version=11 -s:b compiler.libcxx=libstdc++11
+          # source ./conanbuild.sh
           code=0
           set +o pipefail
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
