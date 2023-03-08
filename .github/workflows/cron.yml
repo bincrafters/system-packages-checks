@@ -79,6 +79,7 @@ jobs:
           python3.9 -m pip install conan distro
           code=0
           set +o pipefail
+          conan profile detect
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
           filename=artifact_FreeBSD_${{ matrix.job_id }}.yml
           echo job_id: ${{ matrix.job_id }} > ${filename}
@@ -148,6 +149,7 @@ jobs:
           CONAN_SYSREQUIRES_SUDO: 0
           DEBIAN_FRONTEND: noninteractive
         run: |
+          conan profile detect
           conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config
           conan install --tool-requires cmake/3.25.2@ -g VirtualBuildEnv -b missing -s compiler.version=5 -s compiler.cppstd=11
           source ./conanbuild.sh
@@ -208,6 +210,7 @@ jobs:
           python3 -m pip install cmake -Iv cmake==3.22.0
           code=0
           set +o pipefail
+          conan profile detect
           conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
           filename=artifact_Raspberry_${{ matrix.job_id }}.yml
           echo job_id: ${{ matrix.job_id }} > ${filename}
