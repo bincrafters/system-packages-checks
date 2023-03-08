@@ -79,7 +79,7 @@ jobs:
           python3.9 -m pip install conan distro
           code=0
           set +o pipefail
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ -c tools.system.package_manager:mode=install || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
           filename=artifact_FreeBSD_${{ matrix.job_id }}.yml
           echo job_id: ${{ matrix.job_id }} > ${filename}
           echo package: ${{ matrix.package }} >> ${filename}
@@ -149,11 +149,11 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
         run: |
           conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config
-          conan install cmake/3.18.2@ -g virtualrunenv -b missing -s compiler.version=5 -s compiler.cppstd=11
-          source ./activate_run.sh
+          conan install --tool-requires cmake/3.25.2@ -g VirtualBuildEnv -b missing -s compiler.version=5 -s compiler.cppstd=11
+          source ./conanbuild.sh
           code=0
           set +o pipefail
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ -c tools.system.package_manager:mode=install || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
           distro=${{ matrix.distro }}
           distro=${distro////_}
           distro=${distro//:/_}
@@ -208,7 +208,7 @@ jobs:
           python3 -m pip install cmake -Iv cmake==3.22.0
           code=0
           set +o pipefail
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} ${{ matrix.package }}/system@ -c tools.system.package_manager:mode=install || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
           filename=artifact_Raspberry_${{ matrix.job_id }}.yml
           echo job_id: ${{ matrix.job_id }} > ${filename}
           echo package: ${{ matrix.package }} >> ${filename}
