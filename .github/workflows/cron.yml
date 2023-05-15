@@ -125,8 +125,10 @@ jobs:
               yum -y install dnf-plugins-core && yum config-manager --set-enabled powertools && yum install -y python3 python3-pip pkgconf-pkg-config gcc-c++ make;;
             quay.io/centos/centos:stream9)
               yum -y install dnf-plugins-core && yum config-manager --set-enabled crb && yum install -y python3 python3-pip pkgconf-pkg-config gcc-c++ make;;
-            almalinux*)
+            almalinux:8*)
               yum -y install dnf-plugins-core && yum config-manager --set-enabled powertools && yum install -y epel-release && yum install -y python3 python3-wheel python3-pip pkgconf-pkg-config gcc-c++ make;;
+            almalinux:9*)
+              yum -y install dnf-plugins-core && yum config-manager --set-enabled crb && yum install -y epel-release && yum install -y python3 python3-wheel python3-pip pkgconf-pkg-config gcc-c++ make;;
             archlinux*)
               pacman -Syu --noconfirm python-pip gcc pkgconf gcc make;;
             fedora*)
