@@ -25,9 +25,9 @@ jobs:
       matrixLinux: ${{ steps.set-matrix.outputs.matrixLinux }}
       matrixBSD: ${{ steps.set-matrix.outputs.matrixBSD }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Checkout CCI
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: conan-io/conan-center-index
           path: CCI
@@ -63,7 +63,7 @@ jobs:
       CONAN_SYSREQUIRES_MODE: enabled
     steps:
     - name: Checkout CCI
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: ${{ matrix.repo }}
         ref: ${{ matrix.ref }}
@@ -139,7 +139,7 @@ jobs:
         run: python3 -m pip install --upgrade pip && python3 -m pip install conan distro cmake --ignore-installed
 
       - name: Checkout CCI
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: ${{ matrix.repo }}
           ref: ${{ matrix.ref }}
@@ -190,7 +190,7 @@ jobs:
 
     steps:
     - name: Checkout CCI
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: ${{ matrix.repo }}
         ref: ${{ matrix.ref }}
@@ -237,7 +237,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v4
         with:
           python-version: "3.8"
