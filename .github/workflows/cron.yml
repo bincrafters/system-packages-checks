@@ -116,17 +116,29 @@ jobs:
         run: |
           case ${{ matrix.distro }} in
             opensuse*)
-              zypper --non-interactive install python3 python-pipx python3-setuptools python3-wheel tar gzip pkg-config gcc-c++ make;;
+              zypper --non-interactive install python3 python-pip python3-setuptools python3-wheel tar gzip pkg-config gcc-c++ make
+              python3 -m pip install --user pipx
+              python3 -m pipx ensurepath
+              ;;
             debian*)
-              apt-get update && apt-get -qq install -y --no-install-recommends pipx python3-setuptools pkg-config g++ make;;
+              apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools pkg-config g++ make
+              python3 -m pip install --user pipx
+              python3 -m pipx ensurepath
+              ;;
             ubuntu*)
               apt-get update && apt-get -qq install -y --no-install-recommends pipx python3-setuptools pkg-config g++ make;;
             quay.io/centos/centos:stream8)
-              yum -y install dnf-plugins-core && yum config-manager --set-enabled powertools && yum install -y python3 pipx pkgconf-pkg-config gcc-c++ make;;
+              yum -y install dnf-plugins-core && yum config-manager --set-enabled powertools && yum install -y python3 python3-pip pkgconf-pkg-config gcc-c++ make
+              python3 -m pip install --user pipx
+              python3 -m pipx ensurepath
+              ;;
             quay.io/centos/centos:stream9)
               yum -y install dnf-plugins-core && yum config-manager --set-enabled crb && yum install -y python3 pipx pkgconf-pkg-config gcc-c++ make;;
             almalinux:8*)
-              yum -y install dnf-plugins-core && yum config-manager --set-enabled powertools && yum install -y epel-release && yum install -y python3 python3-wheel pipx pkgconf-pkg-config gcc-c++ make;;
+              yum -y install dnf-plugins-core && yum config-manager --set-enabled powertools && yum install -y epel-release && yum install -y python3 python3-wheel python3-pip pkgconf-pkg-config gcc-c++ make
+              python3 -m pip install --user pipx
+              python3 -m pipx ensurepath
+              ;;
             almalinux:9*)
               yum -y install dnf-plugins-core && yum config-manager --set-enabled crb && yum install -y epel-release && yum install -y python3 python3-wheel pipx pkgconf-pkg-config gcc-c++ make;;
             archlinux*)
