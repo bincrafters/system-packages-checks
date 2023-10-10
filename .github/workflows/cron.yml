@@ -119,8 +119,7 @@ jobs:
               zypper --non-interactive install python3 python3-pipx python3-setuptools python3-wheel tar gzip pkg-config gcc-c++ make
               ;;
             debian*)
-              apt-get update && apt-get -qq install -y --no-install-recommends python3-pip python3-setuptools python3-venv pkg-config g++ make
-              python3 -m pip install --user pipx
+              apt-get update && apt-get -qq install -y --no-install-recommends pipx python3-setuptools python3-venv pkg-config g++ make
               ;;
             ubuntu*)
               apt-get update && apt-get -qq install -y --no-install-recommends pipx python3-setuptools python3-venv pkg-config g++ make;;
