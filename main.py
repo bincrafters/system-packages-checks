@@ -31,7 +31,7 @@ class MatrixGenerator:
             self.session.auth = requests.auth.HTTPBasicAuth(user, pw)
 
         self.prs = {}
-
+        return
         page = 1
         while True:
             r = self._make_request("GET", f"/repos/{self.owner}/{self.repo}/pulls",
