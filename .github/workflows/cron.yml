@@ -116,7 +116,7 @@ jobs:
         run: |
           case ${{ matrix.distro }} in
             opensuse*)
-              zypper --non-interactive install python3 python311-pipx python3-setuptools python3-wheel tar gzip pkg-config gcc-c++ make;;
+              zypper --non-interactive install python3 python-pipx python3-setuptools python3-wheel tar gzip pkg-config gcc-c++ make;;
             debian*)
               apt-get update && apt-get -qq install -y --no-install-recommends pipx python3-setuptools pkg-config g++ make;;
             ubuntu*)
@@ -148,7 +148,9 @@ jobs:
           CONAN_SYSREQUIRES_SUDO: 0
           DEBIAN_FRONTEND: noninteractive
         run: |
-          pipx install conan distro cmake --ignore-installed
+          pipx install conan
+          pipx install distro
+          pipx install cmake
           conan profile detect
           # conan config install ${GITHUB_SERVER_URL}/${{ github.repository }}/archive/${{ github.sha }}.zip -sf=system-packages-checks-${{ github.sha }}/config
           # conan install --tool-requires cmake/3.25.2@ -g VirtualBuildEnv -s:b compiler=gcc -s:b compiler.version=11 -s:b compiler.libcxx=libstdc++11
