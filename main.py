@@ -130,7 +130,8 @@ class MatrixGenerator:
         linux = []
         for p in res:
             for distro in ["opensuse/tumbleweed",
-                           "opensuse/leap:15.2",
+                           "opensuse/leap",
+                           "debian:12",
                            "debian:11",
                            "debian:10",
                            "ubuntu:jammy",
@@ -138,12 +139,9 @@ class MatrixGenerator:
                            "almalinux:8",
                            "almalinux:9",
                            "archlinux",
-                           "fedora:36",
-                           "fedora:35",
-                           "fedora:34",
-                           "fedora:33",
+                           "fedora",
                            "quay.io/centos/centos:stream8",
-                           # "quay.io/centos/centos:stream9", # Error: Unable to find a match: libXvMC-devel
+                           "quay.io/centos/centos:stream9",
                            ]:
                 config = copy.deepcopy(p)
                 config['distro'] = distro
