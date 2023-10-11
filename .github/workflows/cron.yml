@@ -215,7 +215,7 @@ jobs:
           export DEBIAN_FRONTEND=noninteractive
           export PIP_ONLY_BINARY=cmake # workaround scikit-build/cmake-python-distributions#192
           apt-get update && apt-get -qq install -y --no-install-recommends pipx python3-setuptools python3-venv pkg-config g++ make
-          export PATH=~/.local/bin:$PATH
+          export PATH=/opt/pipx_bin:$PATH
           pipx install conan
           pipx install distro
           pipx install cmake

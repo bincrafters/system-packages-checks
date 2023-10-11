@@ -31,6 +31,7 @@ class MatrixGenerator:
             self.session.auth = requests.auth.HTTPBasicAuth(user, pw)
 
         self.prs = {}
+        return
 
         page = 1
         while True:
