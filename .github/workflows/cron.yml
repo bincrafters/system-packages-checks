@@ -254,10 +254,17 @@ jobs:
       - run: python3 -m pip install -r requirements.txt
 
       - uses: actions/download-artifact@v4
+        with:
+          pattern: my-artifact-*
+          merge-multiple: true
 
       - name: Generate web page
         run: |
+          pwd
+          ls -al
           python create_report.py
+          ls -al
+          ls -al pages
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
