@@ -15,7 +15,7 @@ def append_to_file(content: str, filename: str) -> None:
                             'runs',
                             os.getenv('GITHUB_RUN_ID', ''),
                            'attempts',
-                            os.getenv('GITHUB_RUN_ATTEMPT')])
+                            os.getenv('GITHUB_RUN_ATTEMPT', '')])
             text_file.write("page generated on {{ site.time | date_to_xmlschema }} ")
             text_file.write(f"during [this run]({url})\n\n")
         text_file.write(content)
