@@ -92,10 +92,10 @@ jobs:
             code=0
           fi
           exit "$code"
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ always() }}
       with:
-        name: my-artifact
+        name: my-artifact-${{ github.job }}-${{ matrix.job_id }}
         path: artifact_*.yml
 
   Linux:
@@ -180,10 +180,10 @@ jobs:
           fi
           exit "$code"
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
-          name: my-artifact
+          name: my-artifact-${{ github.job }}-${{ matrix.job_id }}
           path: artifact_*.yml
 
   Raspberry:
@@ -234,10 +234,10 @@ jobs:
             code=0
           fi
           exit "$code"
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: ${{ always() }}
       with:
-        name: my-artifact
+        name: my-artifact-${{ github.job }}-${{ matrix.job_id }}
         path: artifact_*.yml
 
   Gather_Results:
@@ -254,8 +254,6 @@ jobs:
       - run: python3 -m pip install -r requirements.txt
 
       - uses: actions/download-artifact@v4
-        with:
-          name: my-artifact
 
       - name: Generate web page
         run: |
