@@ -95,7 +95,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: ${{ always() }}
       with:
-        name: my-artifact
+        name: my-artifact-${{ github.job }}-${{ join(matrix.*, ' - ') }}
         path: artifact_*.yml
 
   Linux:
@@ -183,7 +183,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
-          name: my-artifact
+          name: my-artifact-${{ github.job }}-${{ join(matrix.*, ' - ') }}
           path: artifact_*.yml
 
   Raspberry:
@@ -237,7 +237,7 @@ jobs:
     - uses: actions/upload-artifact@v4
       if: ${{ always() }}
       with:
-        name: my-artifact
+        name: my-artifact-${{ github.job }}-${{ join(matrix.*, ' - ') }}
         path: artifact_*.yml
 
   Gather_Results:
@@ -253,9 +253,7 @@ jobs:
           cache: 'pip' # caching pip dependencies
       - run: python3 -m pip install -r requirements.txt
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: my-artifact
+      - uses: actions/download-artifact@v4
 
       - name: Generate web page
         run: |
