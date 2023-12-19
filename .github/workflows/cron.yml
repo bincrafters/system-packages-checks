@@ -135,7 +135,7 @@ jobs:
             almalinux:9*)
               yum -y install dnf-plugins-core && yum config-manager --set-enabled crb && yum install -y epel-release && yum install -y python3 python3-wheel pipx pkgconf-pkg-config gcc-c++ make;;
             archlinux*)
-              pacman -Syu --noconfirm python-pipx gcc pkgconf gcc make;;
+              pacman -Syu --noconfirm python-pipx python-platformdirs gcc pkgconf gcc make;;
             fedora*)
               dnf -y install python3 python3-wheel pipx pkgconf-pkg-config gcc-c++ make;;
           esac
