@@ -122,12 +122,6 @@ class MatrixGenerator:
 
             await asyncio.gather(*tasks)
 
-        job_id = 0
-        for p in res:
-            p["job_id"] = str(job_id)
-            job_id += 1
-
-        job_id = 0
         linux = []
         for p in res:
             for distro in ["opensuse/tumbleweed",
@@ -145,8 +139,6 @@ class MatrixGenerator:
                            ]:
                 config = copy.deepcopy(p)
                 config['distro'] = distro
-                config["job_id"] = str(job_id)
-                job_id += 1
                 linux.append(config)
 
         with open("matrixLinux.yml", "w", encoding="latin_1") as f:
