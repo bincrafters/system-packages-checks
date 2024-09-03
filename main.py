@@ -125,7 +125,7 @@ class MatrixGenerator:
         linux = []
         for p in res:
             for distro in ["opensuse/tumbleweed",
-                           # "opensuse/leap", # does not have pipx
+                           "opensuse/leap",
                            "debian:12",
                            "debian:10",
                            "ubuntu:jammy",
@@ -134,8 +134,7 @@ class MatrixGenerator:
                            "almalinux:9",
                            "archlinux",
                            "fedora",
-                           "quay.io/centos/centos:stream8",
-                           # "quay.io/centos/centos:stream9", # does not have pipx
+                           "quay.io/centos/centos:stream9",
                            ]:
                 config = copy.deepcopy(p)
                 config['distro'] = distro
