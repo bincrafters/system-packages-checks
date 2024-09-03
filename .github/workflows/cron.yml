@@ -74,9 +74,9 @@ jobs:
       with:
         envs: 'CONAN_MAKE_PROGRAM CC CXX CONAN_SYSREQUIRES_MODE'
         usesh: true
-        prepare: pkg install -y cmake py39-pip py39-sqlite3 sudo pkgconf
+        prepare: pkg install -y cmake py311-pip py311-sqlite3 sudo pkgconf
         run: |
-          python3.9 -m pip install conan distro
+          python3.11 -m pip install conan distro
           code=0
           set +o pipefail
           conan profile detect
