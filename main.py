@@ -135,6 +135,7 @@ class MatrixGenerator:
                            "archlinux",
                            "fedora",
                            "quay.io/centos/centos:stream9",
+                           "alpine:3.20",
                            ]:
                 config = copy.deepcopy(p)
                 config['distro'] = distro

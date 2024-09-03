@@ -139,7 +139,9 @@ jobs:
             archlinux*)
               pacman -Syu --noconfirm python-pipx python-platformdirs gcc pkgconf gcc make;;
             fedora*)
-              dnf -y install python3 python3-wheel pipx pkgconf-pkg-config gcc-c++ make;;
+              dnf -y install python3 python3-wheel pipx pkgconf g++ make;;
+            alpine*)
+              apk add bash python3 py3-wheel pipx pkgconf g++ make;;
           esac
 
       - name: Checkout CCI
