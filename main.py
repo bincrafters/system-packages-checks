@@ -3,7 +3,6 @@
 import os
 import json
 import copy
-import urllib.parse
 import asyncio
 import logging
 from datetime import datetime
@@ -115,10 +114,7 @@ class MatrixGenerator:
             for pr in self.prs.values():
                 pr_number = str(pr["number"])
                 for package in pr['libs']:
-                    if not pr["head"]["repo"]:
-                        logging.warning("no repo detected for pr #%s", pr_number)
-                        continue
-                    tasks.append(_add_package(package, f'{self.owner}/{self.repo}', f"pull/{pr_number}/merge", pr_number))
+                    tasks.append(_add_package(package, f'{self.owner}/{self.repo}', pr["merge_commit_sha"], pr_number))
 
             await asyncio.gather(*tasks)
 
