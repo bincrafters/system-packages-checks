@@ -20,7 +20,7 @@ env:
 jobs:
   generate-matrix:
     name: Generate Job Matrix
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       matrixLinux: ${{ steps.set-matrix.outputs.matrixLinux }}
       matrixBSD: ${{ steps.set-matrix.outputs.matrixBSD }}
@@ -54,7 +54,7 @@ jobs:
       fail-fast: false
       matrix: ${{fromJson(needs.generate-matrix.outputs.matrixBSD)}}
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     env:
       CC: clang
@@ -103,7 +103,7 @@ jobs:
       fail-fast: false
       matrix: ${{fromJson(needs.generate-matrix.outputs.matrixLinux)}}
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container: ${{ matrix.distro }}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
