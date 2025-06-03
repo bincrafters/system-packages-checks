@@ -6,6 +6,7 @@ import copy
 import asyncio
 import logging
 from datetime import datetime
+from typing import Any
 import aiohttp
 import yaml
 import requests
@@ -57,7 +58,7 @@ class MatrixGenerator:
                 res.add(f"{parts[1]}/{parts[2]}")
         return res
 
-    def _make_request(self, method: str, url: str, **kwargs) -> requests.Response:
+    def _make_request(self, method: str, url: str, **kwargs: Any) -> requests.Response:
         if self.dry_run and method in ["PATCH", "POST"]:
             return requests.Response()
 
