@@ -43,7 +43,7 @@ jobs:
           python-version: '>=3.6'
 
       - name: Install Pyre
-        run: pip install pyre-check
+        run: pip install pyre-check "click<8.2.0"
         shell: bash
 
       - name: Install dependencies
@@ -51,12 +51,7 @@ jobs:
         shell: bash
 
       - name: Set up Pyre
-        run: |
-          echo '{
-              "source_directories": [
-                "."
-              ]
-          }' > .pyre_configuration
+        run: echo -e '\n' | pyre init
         shell: bash
 
       - name: Run Pyre
