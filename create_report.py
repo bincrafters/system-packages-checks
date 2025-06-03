@@ -1,7 +1,6 @@
 # pylint: disable = invalid-name, too-many-branches
 
 import os
-from typing import Dict, List
 import yaml
 
 
@@ -22,7 +21,7 @@ def append_to_file(content: str, filename: str) -> None:
 
 
 def createReport() -> None:  # noqa: MC0001
-    res: Dict[str, Dict[str, Dict[str, List[str]]]] = {}
+    res: dict[str, dict[str, dict[str, int]]] = {}
     for file_name in os.listdir():
         if not file_name.startswith('artifact_'):
             continue
@@ -51,7 +50,7 @@ def createReport() -> None:  # noqa: MC0001
     os.makedirs("pr", exist_ok=True)
     os.makedirs("_includes", exist_ok=True)
     for pr in sorted(res):
-        if pr == 0:
+        if pr == "0":
             md = "\n# master\n\n"
         else:
             md = f"\n# [#{pr}](https://github.com/conan-io/conan-center-index/pull/{pr})\n\n"
@@ -81,7 +80,7 @@ def createReport() -> None:  # noqa: MC0001
         print(md)
         with open(f"_includes/{pr}.md", "w", encoding="latin_1") as text_file:
             text_file.write(md)
-        md = "{% include " + str(pr) + ".md %}\n"
+        md = f"{{% include {pr}.md %}}\n"
         append_to_file(md, f"pr/{pr}.md")
         append_to_file(md, "index.md")
 
