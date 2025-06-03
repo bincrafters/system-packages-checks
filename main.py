@@ -6,7 +6,7 @@ import copy
 import asyncio
 import logging
 from datetime import datetime
-from typing import Set, Dict, List
+from typing import Any
 import aiohttp
 import yaml
 import requests
@@ -50,15 +50,15 @@ class MatrixGenerator:
         for pr_number, pr in self.prs.items():
             pr["libs"] = self._get_modified_libs_for_pr(pr_number)
 
-    def _get_modified_libs_for_pr(self, pr: int) -> Set[str]:
-        res: Set[str] = set()
+    def _get_modified_libs_for_pr(self, pr: int) -> set[str]:
+        res: set[str] = set()
         for file in self._make_request("GET", f"/repos/{self.owner}/{self.repo}/pulls/{pr}/files").json():
             parts = file['filename'].split("/")
             if len(parts) >= 4 and parts[0] == "recipes":
                 res.add(f"{parts[1]}/{parts[2]}")
         return res
 
-    def _make_request(self, method: str, url: str, **kwargs) -> requests.Response:
+    def _make_request(self, method: str, url: str, **kwargs: Any) -> requests.Response:
         if self.dry_run and method in ["PATCH", "POST"]:
             return requests.Response()
 
@@ -71,7 +71,7 @@ class MatrixGenerator:
         return r
 
     async def generate_matrix(self) -> None:  # noqa: MC0001
-        res: List[Dict[str, str]] = []
+        res: list[dict[str, str]] = []
 
         async with aiohttp.ClientSession() as session:
 
