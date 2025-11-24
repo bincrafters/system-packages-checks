@@ -25,9 +25,9 @@ jobs:
       matrixLinux: ${{ steps.set-matrix.outputs.matrixLinux }}
       matrixBSD: ${{ steps.set-matrix.outputs.matrixBSD }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Checkout CCI
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: conan-io/conan-center-index
           path: CCI
@@ -62,7 +62,7 @@ jobs:
       CONAN_SYSREQUIRES_MODE: enabled
     steps:
     - name: Checkout CCI
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: ${{ matrix.repo }}
         ref: ${{ matrix.ref }}
@@ -144,7 +144,7 @@ jobs:
           esac
 
       - name: Checkout CCI
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ${{ matrix.repo }}
           ref: ${{ matrix.ref }}
@@ -195,7 +195,7 @@ jobs:
 
     steps:
     - name: Checkout CCI
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: ${{ matrix.repo }}
         ref: ${{ matrix.ref }}
@@ -243,7 +243,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           cache: 'pip' # caching pip dependencies
