@@ -96,6 +96,9 @@ class MatrixGenerator:
                         except yaml.YAMLError as exc:
                             logging.warning("Error in configuration file:%s, %s, %s, %s, %s", package, repo, ref, pr, exc)
                             return
+                        if "versions" not in config:
+                            logging.warning("Config misses versions for %s", package)
+                            return
                         if "system" not in config["versions"]:
                             return
                         folder = config["versions"]["system"]["folder"]
