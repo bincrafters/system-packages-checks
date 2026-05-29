@@ -125,16 +125,16 @@ class MatrixGenerator:
         for p in res:
             for distro in ["opensuse/tumbleweed",
                            "opensuse/leap",
-                           "debian:12",
-                           "debian:10",
-                           "ubuntu:jammy",
-                           "ubuntu:focal",
-                           "almalinux:8",
+                           "debian:stable",
+                           "debian:oldstable",
+                           "ubuntu:24.04",
+                           "ubuntu:26.04",
                            "almalinux:9",
+                           "almalinux:10",
                            "archlinux",
                            "fedora",
-                           "quay.io/centos/centos:stream9",
-                           "alpine:3.20",
+                           "quay.io/centos/centos:stream10",
+                           "alpine:3.23",
                            ]:
                 config = copy.deepcopy(p)
                 config['distro'] = distro

@@ -216,7 +216,7 @@ jobs:
           export PATH=/opt/pipx_bin:$PATH
           pipx install conan
           pipx install distro
-          pipx install cmake --pip-args "-Iv cmake==3.22.0"
+          pipx install cmake --pip-args "-Iv cmake==3.31.10"
           code=0
           set +o pipefail
           conan profile detect
