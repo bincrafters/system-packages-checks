@@ -61,6 +61,8 @@ jobs:
       CXX: clang++
       CONAN_SYSREQUIRES_MODE: enabled
     steps:
+    - uses: qoomon/actions--context@v5.0.1
+      id: context
     - name: Checkout CCI
       uses: actions/checkout@v6
       with:
@@ -84,6 +86,7 @@ jobs:
           echo package: ${{ matrix.package }} >> ${filename}
           echo pr: ${{ matrix.pr }} >> ${filename}
           echo distro: FreeBSD >> ${filename}
+          echo 'url: "${{ steps.context.outputs.job_html_url }}"' >> ${filename}
           echo res: $code >> ${filename}
           if [ $code == 6 ]
           then
@@ -109,7 +112,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: qoomon/actions--context@v5.0.1
-      - run: printenv
+        id: context
       - name: Install Python
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -169,6 +172,7 @@ jobs:
           echo package: ${{ matrix.package }} >> ${filename}
           echo pr: ${{ matrix.pr }} >> ${filename}
           echo distro: "${{ matrix.distro }}" >> ${filename}
+          echo 'url: "${{ steps.context.outputs.job_html_url }}"' >> ${filename}
           echo res: $code >> ${filename}
           if [ $code == 6 ]
           then
@@ -192,6 +196,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: qoomon/actions--context@v5.0.1
+      id: context
     - name: Checkout CCI
       uses: actions/checkout@v6
       with:
@@ -223,6 +229,7 @@ jobs:
           echo package: ${{ matrix.package }} >> ${filename}
           echo pr: ${{ matrix.pr }} >> ${filename}
           echo distro: Raspberry >> ${filename}
+          echo 'url: "${{ steps.context.outputs.job_html_url }}"' >> ${filename}
           echo res: $code >> ${filename}
           if [ $code == 6 ]
           then

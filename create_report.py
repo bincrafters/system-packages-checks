@@ -21,7 +21,7 @@ def append_to_file(content: str, filename: str) -> None:
 
 
 def createReport() -> None:  # noqa: MC0001
-    res: dict[str, dict[str, dict[str, int]]] = {}
+    res: dict[str, dict[str, dict[str, tuple[int, str]]]] = {}
     for file_name in os.listdir():
         if not file_name.startswith('artifact_'):
             continue
@@ -34,7 +34,7 @@ def createReport() -> None:  # noqa: MC0001
         if d['package'] not in res[d['pr']]:
             res[d['pr']][d['package']] = {}
 
-        res[d['pr']][d['package']][d['distro']] = d['res']
+        res[d['pr']][d['package']][d['distro']] = (d['res'], d['url'])
 
     distros = []
 
@@ -69,12 +69,12 @@ def createReport() -> None:  # noqa: MC0001
             for package in packages:
                 if d not in res[pr][package]:
                     md += " Not run |"
-                elif res[pr][package][d] == 0:
-                    md += " Success |"
-                elif res[pr][package][d] == 6:
-                    md += " Not supported |"
+                elif res[pr][package][d][0] == 0:
+                    md += f" [Success]({res[pr][package][d][1]}) |"
+                elif res[pr][package][d][0] == 6:
+                    md += f" [Not supported]({res[pr][package][d][1]}) |"
                 else:
-                    md += f" ***Failure {res[pr][package][d]}*** |"
+                    md += f" ***[Failure {res[pr][package][d]}]({res[pr][package][d][1]})*** |"
             md += "\n"
         md += "\n"
         print(md)
