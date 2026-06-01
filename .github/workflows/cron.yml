@@ -246,7 +246,7 @@ jobs:
     name: Gather results
     needs: [FreeBSD, Linux, Raspberry]
     runs-on: ubuntu-latest
-    if: ${{ always() }}
+    if: ${{ !cancelled() }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6

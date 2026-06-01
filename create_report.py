@@ -74,7 +74,7 @@ def createReport() -> None:  # noqa: MC0001
                 elif res[pr][package][d][0] == 6:
                     md += f" [Not supported]({res[pr][package][d][1]}) |"
                 else:
-                    md += f" ***[Failure {res[pr][package][d]}]({res[pr][package][d][1]})*** |"
+                    md += f" ***[Failure {res[pr][package][d][0]}]({res[pr][package][d][1]})*** |"
             md += "\n"
         md += "\n"
         print(md)
