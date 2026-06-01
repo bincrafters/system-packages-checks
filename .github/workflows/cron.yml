@@ -108,6 +108,8 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - uses: qoomon/actions--context@v5.0.1
+      - run: printenv
       - name: Install Python
         env:
           DEBIAN_FRONTEND: noninteractive
