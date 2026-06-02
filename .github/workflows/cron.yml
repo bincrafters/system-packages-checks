@@ -81,7 +81,7 @@ jobs:
           code=0
           set +o pipefail
           conan profile detect
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install -o gtk/system:version=3 || code=$?
           filename=artifact_${{ github.job }}_${{ strategy.job-index }}.yml
           echo package: ${{ matrix.package }} >> ${filename}
           echo pr: ${{ matrix.pr }} >> ${filename}
@@ -167,7 +167,7 @@ jobs:
           # source ./conanbuild.sh
           code=0
           set +o pipefail
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install -o gtk/system:version=3 || code=$?
           filename=artifact_${{ github.job }}_${{ strategy.job-index }}.yml
           echo package: ${{ matrix.package }} >> ${filename}
           echo pr: ${{ matrix.pr }} >> ${filename}
@@ -224,7 +224,7 @@ jobs:
           code=0
           set +o pipefail
           conan profile detect
-          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install || code=$?
+          conan create CCI/recipes/${{ matrix.package }}/${{ matrix.folder }} --version system -c tools.system.package_manager:mode=install -o gtk/system:version=3 || code=$?
           filename=artifact_${{ github.job }}_${{ strategy.job-index }}.yml
           echo package: ${{ matrix.package }} >> ${filename}
           echo pr: ${{ matrix.pr }} >> ${filename}
