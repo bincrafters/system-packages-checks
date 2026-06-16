@@ -6,120 +6,118 @@ import copy
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any
 import aiohttp
 import yaml
-import requests
 
 
 class MatrixGenerator:
     owner: str = "conan-io"
     repo: str = "conan-center-index"
-    dry_run: bool = False
 
-    def __init__(self, token: str = "", user: str = "", pw: str = ""):  # noqa: MC0001
-        self.session = requests.session()
+    def __init__(self, session: aiohttp.ClientSession, token: str = "", user: str = "", pw: str = ""):  # noqa: MC0001
+        self.session = session
         if token:
             self.session.headers["Authorization"] = f"token {token}"
 
         self.session.headers["Accept"] = "application/vnd.github.v3+json"
         self.session.headers["User-Agent"] = "request"
 
-        self.session.auth = None
         if user and pw:
-            self.session.auth = requests.auth.HTTPBasicAuth(user, pw)
+            self.session.headers["Authorization"] = aiohttp.encode_basic_auth(user, pw)
 
         self.prs = {}
 
+    async def populate_prs(self):
         page = 1
         while True:
-            r = self._make_request("GET", f"/repos/{self.owner}/{self.repo}/pulls",
-                                   params={"state": "open",
+            async with self.session.get(f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls", params={"state": "open",
                                            "sort": "created",
                                            "direction": "desc",
                                            "per_page": 100,
-                                           "page": str(page)})
-            r.raise_for_status()
-            results = r.json()
+                                           "page": str(page)}) as r:
+                r.raise_for_status()
+                if int(r.headers["X-RateLimit-Remaining"]) < 10:
+                    logging.warning("%s/%s github api call used, remaining %s until %s",
+                                    r.headers["X-Ratelimit-Used"], r.headers["X-RateLimit-Limit"], r.headers["X-RateLimit-Remaining"],
+                                    datetime.fromtimestamp(int(r.headers["X-Ratelimit-Reset"])))
+                results = await r.json()
             for p in results:
                 self.prs[int(p["number"])] = p
             page += 1
             if not results:
                 break
 
-        for pr_number, pr in self.prs.items():
-            pr["libs"] = self._get_modified_libs_for_pr(pr_number)
+        for pr_number, libs in zip(self.prs, await asyncio.gather(*[
+            self._get_modified_libs_for_pr(pr_number)
+            for pr_number in self.prs
+        ])):
+            self.prs[pr_number]["libs"] = libs
 
-    def _get_modified_libs_for_pr(self, pr: int) -> set[str]:
+    async def _get_modified_libs_for_pr(self, pr: int) -> set[str]:
         res: set[str] = set()
-        for file in self._make_request("GET", f"/repos/{self.owner}/{self.repo}/pulls/{pr}/files").json():
+        
+        async with self.session.get(f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{pr}/files") as r:
+            r.raise_for_status()
+            if int(r.headers["X-RateLimit-Remaining"]) < 10:
+                logging.warning("%s/%s github api call used, remaining %s until %s",
+                                r.headers["X-Ratelimit-Used"], r.headers["X-RateLimit-Limit"], r.headers["X-RateLimit-Remaining"],
+                                datetime.fromtimestamp(int(r.headers["X-Ratelimit-Reset"])))
+            files = await r.json()
+            
+        for file in files:
             parts = file['filename'].split("/")
             if len(parts) >= 4 and parts[0] == "recipes":
                 res.add(f"{parts[1]}/{parts[2]}")
         return res
 
-    def _make_request(self, method: str, url: str, **kwargs: Any) -> requests.Response:
-        if self.dry_run and method in ["PATCH", "POST"]:
-            return requests.Response()
-
-        r = self.session.request(method, f"https://api.github.com{url}", **kwargs)
-        r.raise_for_status()
-        if int(r.headers["X-RateLimit-Remaining"]) < 10:
-            logging.warning("%s/%s github api call used, remaining %s until %s",
-                            r.headers["X-Ratelimit-Used"], r.headers["X-RateLimit-Limit"], r.headers["X-RateLimit-Remaining"],
-                            datetime.fromtimestamp(int(r.headers["X-Ratelimit-Reset"])))
-        return r
-
     async def generate_matrix(self) -> None:  # noqa: MC0001
         res: list[dict[str, str]] = []
 
-        async with aiohttp.ClientSession() as session:
-
-            async def _add_package(package: str, repo: str, ref: str, pr: str = "0") -> None:
-                refs = package.split("/")
-                package = refs[0]
-                modified_folder = refs[1] if len(refs) >= 2 else ""
-                async with session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/config.yml") as r:
-                    if r.status == 404:
-                        folder = "system"
-                        if modified_folder and modified_folder != folder:
+        async def _add_package(package: str, repo: str, ref: str, pr: str = "0") -> None:
+            refs = package.split("/")
+            package = refs[0]
+            modified_folder = refs[1] if len(refs) >= 2 else ""
+            async with self.session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/config.yml") as r:
+                if r.status == 404:
+                    folder = "system"
+                    if modified_folder and modified_folder != folder:
+                        return
+                    async with self.session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/{folder}/conanfile.py") as r:
+                        if r.status == 404:
+                            logging.warning("no system folder found for package %s in pr %s %s", package, pr, r.url)
                             return
-                        async with session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/{folder}/conanfile.py") as r:
-                            if r.status == 404:
-                                logging.warning("no system folder found for package %s in pr %s %s", package, pr, r.url)
-                                return
-                            r.raise_for_status()
-                    else:
                         r.raise_for_status()
-                        try:
-                            config = yaml.safe_load(await r.text())
-                        except yaml.YAMLError as exc:
-                            logging.warning("Error in configuration file:%s, %s, %s, %s, %s", package, repo, ref, pr, exc)
-                            return
-                        if "versions" not in config:
-                            logging.warning("Config misses versions for %s", package)
-                            return
-                        if "system" not in config["versions"]:
-                            return
-                        folder = config["versions"]["system"]["folder"]
-                        if modified_folder and modified_folder != folder:
-                            return
-                res.append({'package': package,
-                            'repo': repo,
-                            'ref': ref,
-                            'folder': folder,
-                            'pr': pr,
-                            })
-            tasks = []
-            for package in os.listdir("CCI/recipes"):
-                tasks.append(_add_package(package, f'{self.owner}/{self.repo}', 'master'))
+                else:
+                    r.raise_for_status()
+                    try:
+                        config = yaml.safe_load(await r.text())
+                    except yaml.YAMLError as exc:
+                        logging.warning("Error in configuration file:%s, %s, %s, %s, %s", package, repo, ref, pr, exc)
+                        return
+                    if "versions" not in config:
+                        logging.warning("Config misses versions for %s", package)
+                        return
+                    if "system" not in config["versions"]:
+                        return
+                    folder = config["versions"]["system"]["folder"]
+                    if modified_folder and modified_folder != folder:
+                        return
+            res.append({'package': package,
+                        'repo': repo,
+                        'ref': ref,
+                        'folder': folder,
+                        'pr': pr,
+                        })
+        tasks = []
+        for package in os.listdir("CCI/recipes"):
+            tasks.append(_add_package(package, f'{self.owner}/{self.repo}', 'master'))
 
-            for pr in self.prs.values():
-                pr_number = str(pr["number"])
-                for package in pr['libs']:
-                    tasks.append(_add_package(package, f'{self.owner}/{self.repo}', pr["merge_commit_sha"], pr_number))
+        for pr in self.prs.values():
+            pr_number = str(pr["number"])
+            for package in pr['libs']:
+                tasks.append(_add_package(package, f'{self.owner}/{self.repo}', pr["merge_commit_sha"], pr_number))
 
-            await asyncio.gather(*tasks)
+        await asyncio.gather(*tasks)
 
         linux = []
         for p in res:
@@ -147,10 +145,12 @@ class MatrixGenerator:
             json.dump({"include": res}, f)
 
 
-def main() -> None:
-    d = MatrixGenerator(token=os.getenv("GH_TOKEN", ""))
-    asyncio.run(d.generate_matrix())
+async def main() -> None:
+    async with aiohttp.ClientSession() as session:
+        d = MatrixGenerator(session, token=os.getenv("GH_TOKEN", ""))
+        await d.populate_prs()
+        await d.generate_matrix()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
