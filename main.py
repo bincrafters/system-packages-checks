@@ -25,16 +25,17 @@ class MatrixGenerator:
         if user and pw:
             self.session.headers["Authorization"] = aiohttp.encode_basic_auth(user, pw)
 
-        self.prs = {}
+        self.prs: dict[int, dict] = {}
 
-    async def populate_prs(self):
+    async def populate_prs(self) -> None:
         page = 1
         while True:
-            async with self.session.get(f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls", params={"state": "open",
-                                           "sort": "created",
-                                           "direction": "desc",
-                                           "per_page": 100,
-                                           "page": str(page)}) as r:
+            async with self.session.get(f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls",
+                                        params={"state": "open",
+                                                "sort": "created",
+                                                "direction": "desc",
+                                                "per_page": 100,
+                                                "page": str(page)}) as r:
                 r.raise_for_status()
                 if int(r.headers["X-RateLimit-Remaining"]) < 10:
                     logging.warning("%s/%s github api call used, remaining %s until %s",
@@ -55,7 +56,7 @@ class MatrixGenerator:
 
     async def _get_modified_libs_for_pr(self, pr: int) -> set[str]:
         res: set[str] = set()
-        
+
         async with self.session.get(f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{pr}/files") as r:
             r.raise_for_status()
             if int(r.headers["X-RateLimit-Remaining"]) < 10:
@@ -63,7 +64,7 @@ class MatrixGenerator:
                                 r.headers["X-Ratelimit-Used"], r.headers["X-RateLimit-Limit"], r.headers["X-RateLimit-Remaining"],
                                 datetime.fromtimestamp(int(r.headers["X-Ratelimit-Reset"])))
             files = await r.json()
-            
+
         for file in files:
             parts = file['filename'].split("/")
             if len(parts) >= 4 and parts[0] == "recipes":
