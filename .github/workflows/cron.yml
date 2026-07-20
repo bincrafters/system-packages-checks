@@ -31,7 +31,7 @@ jobs:
         with:
           repository: conan-io/conan-center-index
           path: CCI
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           cache: 'pip' # caching pip dependencies
       - run: python3 -m pip install -r requirements.txt
@@ -248,7 +248,7 @@ jobs:
     if: ${{ !cancelled() }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v7
         with:
           cache: 'pip' # caching pip dependencies
       - run: python3 -m pip install -r requirements.txt
