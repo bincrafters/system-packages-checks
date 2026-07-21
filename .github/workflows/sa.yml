@@ -1,0 +1,15 @@
+name: Static Analysis
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
+      with:
+        activate-environment: true
+    - run: uv pip install -r requirements.txt
+    - uses: astral-sh/ruff-action@v4.1.0
+    - run: uvx ty check
