@@ -1,40 +1,40 @@
-# pylint: disable = invalid-name, too-many-branches
-
 import os
+from pathlib import Path
+
 import yaml
 
 
-def append_to_file(content: str, filename: str) -> None:
-    file_exists = os.path.isfile(filename)
-    with open(filename, "a", encoding="latin_1") as text_file:
+def append_to_file(content: str, filename: Path) -> None:
+    file_exists = Path.is_file(filename)
+    with Path.open(filename, "a", encoding="latin_1") as text_file:
         if not file_exists:
-            url = "/".join([os.getenv('GITHUB_SERVER_URL', ''),
-                            os.getenv('GITHUB_REPOSITORY', ''),
-                            'actions',
-                            'runs',
-                            os.getenv('GITHUB_RUN_ID', ''),
-                           'attempts',
-                            os.getenv('GITHUB_RUN_ATTEMPT', '')])
+            url = "/".join([os.getenv("GITHUB_SERVER_URL", ""),
+                            os.getenv("GITHUB_REPOSITORY", ""),
+                            "actions",
+                            "runs",
+                            os.getenv("GITHUB_RUN_ID", ""),
+                           "attempts",
+                            os.getenv("GITHUB_RUN_ATTEMPT", "")])
             text_file.write("page generated on {{ site.time | date_to_xmlschema }} ")
             text_file.write(f"during [this run]({url})\n\n")
         text_file.write(content)
 
 
-def createReport() -> None:  # noqa: MC0001
+def createReport() -> None:
     res: dict[str, dict[str, dict[str, tuple[int, str]]]] = {}
-    for file_name in os.listdir():
-        if not file_name.startswith('artifact_'):
+    for file_name in Path.iterdir(Path.cwd()):
+        if not file_name.name.startswith("artifact_"):
             continue
-        with open(file_name, 'rt', encoding="latin_1") as f:
+        with Path.open(file_name, "rt", encoding="latin_1") as f:
             d = yaml.safe_load(f)
 
-        if d['pr'] not in res:
-            res[d['pr']] = {}
+        if d["pr"] not in res:
+            res[d["pr"]] = {}
 
-        if d['package'] not in res[d['pr']]:
-            res[d['pr']][d['package']] = {}
+        if d["package"] not in res[d["pr"]]:
+            res[d["pr"]][d["package"]] = {}
 
-        res[d['pr']][d['package']][d['distro']] = (d['res'], d['url'])
+        res[d["pr"]][d["package"]][d["distro"]] = (d["res"], d["url"])
 
     distros = []
 
@@ -45,10 +45,10 @@ def createReport() -> None:  # noqa: MC0001
                     distros.append(d)
     distros.sort()
 
-    os.makedirs("pages", exist_ok=True)
+    Path.mkdir(Path("pages"), exist_ok=True)
     os.chdir("pages")
-    os.makedirs("pr", exist_ok=True)
-    os.makedirs("_includes", exist_ok=True)
+    Path.mkdir(Path("pr"), exist_ok=True)
+    Path.mkdir(Path("_includes"), exist_ok=True)
     for pr in sorted(res):
         if pr == "0":
             md = "\n# master\n\n"
@@ -78,12 +78,12 @@ def createReport() -> None:  # noqa: MC0001
             md += "\n"
         md += "\n"
         print(md)
-        with open(f"_includes/{pr}.md", "w", encoding="latin_1") as text_file:
+        with Path.open(Path("_includes") / f"{pr}.md", "w", encoding="latin_1") as text_file:
             text_file.write(md)
         md = f"{{% include {pr}.md %}}\n"
-        append_to_file(md, f"pr/{pr}.md")
-        append_to_file(md, "index.md")
+        append_to_file(md, Path("pr") / f"{pr}.md")
+        append_to_file(md, Path("index.md"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     createReport()

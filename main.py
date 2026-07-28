@@ -1,11 +1,13 @@
 # pylint: disable = invalid-name, too-few-public-methods
 
-import os
-import json
-import copy
 import asyncio
+import copy
+import json
 import logging
+import os
 from datetime import datetime
+from pathlib import Path
+
 import aiohttp
 import yaml
 
@@ -14,7 +16,7 @@ class MatrixGenerator:
     owner: str = "conan-io"
     repo: str = "conan-center-index"
 
-    def __init__(self, session: aiohttp.ClientSession, token: str = "", user: str = "", pw: str = ""):  # noqa: MC0001
+    def __init__(self, session: aiohttp.ClientSession, token: str = "", user: str = "", pw: str = "") -> None:
         self.session = session
         if token:
             self.session.headers["Authorization"] = f"token {token}"
@@ -51,7 +53,7 @@ class MatrixGenerator:
         for pr_number, libs in zip(self.prs, await asyncio.gather(*[
             self._get_modified_libs_for_pr(pr_number)
             for pr_number in self.prs
-        ])):
+        ]), strict=True):
             self.prs[pr_number]["libs"] = libs
 
     async def _get_modified_libs_for_pr(self, pr: int) -> set[str]:
@@ -66,12 +68,12 @@ class MatrixGenerator:
             files = await r.json()
 
         for file in files:
-            parts = file['filename'].split("/")
+            parts = file["filename"].split("/")
             if len(parts) >= 4 and parts[0] == "recipes":
                 res.add(f"{parts[1]}/{parts[2]}")
         return res
 
-    async def generate_matrix(self) -> None:  # noqa: MC0001
+    async def generate_matrix(self) -> None:
         res: list[dict[str, str]] = []
 
         async def _add_package(package: str, repo: str, ref: str, pr: str = "0") -> None:
@@ -83,11 +85,11 @@ class MatrixGenerator:
                     folder = "system"
                     if modified_folder and modified_folder != folder:
                         return
-                    async with self.session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/{folder}/conanfile.py") as r:
-                        if r.status == 404:
-                            logging.warning("no system folder found for package %s in pr %s %s", package, pr, r.url)
+                    async with self.session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/{folder}/conanfile.py") as req:
+                        if req.status == 404:
+                            logging.warning("no system folder found for package %s in pr %s %s", package, pr, req.url)
                             return
-                        r.raise_for_status()
+                        req.raise_for_status()
                 else:
                     r.raise_for_status()
                     try:
@@ -103,20 +105,17 @@ class MatrixGenerator:
                     folder = config["versions"]["system"]["folder"]
                     if modified_folder and modified_folder != folder:
                         return
-            res.append({'package': package,
-                        'repo': repo,
-                        'ref': ref,
-                        'folder': folder,
-                        'pr': pr,
+            res.append({"package": package,
+                        "repo": repo,
+                        "ref": ref,
+                        "folder": folder,
+                        "pr": pr,
                         })
-        tasks = []
-        for package in os.listdir("CCI/recipes"):
-            tasks.append(_add_package(package, f'{self.owner}/{self.repo}', 'master'))
+        tasks = [_add_package(package.name, f"{self.owner}/{self.repo}", "master") for package in Path.iterdir(Path("CCI") / "recipes")]
 
         for pr in self.prs.values():
             pr_number = str(pr["number"])
-            for package in pr['libs']:
-                tasks.append(_add_package(package, f'{self.owner}/{self.repo}', pr["merge_commit_sha"], pr_number))
+            tasks.extend(_add_package(package, f"{self.owner}/{self.repo}", pr["merge_commit_sha"], pr_number) for package in pr["libs"])
 
         await asyncio.gather(*tasks)
 
@@ -136,13 +135,13 @@ class MatrixGenerator:
                            "alpine:3.23",
                            ]:
                 config = copy.deepcopy(p)
-                config['distro'] = distro
+                config["distro"] = distro
                 linux.append(config)
 
-        with open("matrixLinux.yml", "w", encoding="latin_1") as f:
+        with Path.open(Path("matrixLinux.yml"), "w", encoding="latin_1") as f:
             json.dump({"include": linux}, f)
 
-        with open("matrixBSD.yml", "w", encoding="latin_1") as f:
+        with Path.open(Path("matrixBSD.yml"), "w", encoding="latin_1") as f:
             json.dump({"include": res}, f)
 
 

@@ -34,7 +34,7 @@ jobs:
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           activate-environment: true
-      - run: uv pip install -r requirements.txt
+      - run: uv sync --locked --no-dev
       - name: Generate Job Matrix
         id: set-matrix
         run: |
@@ -251,7 +251,7 @@ jobs:
       - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
         with:
           activate-environment: true
-      - run: uv pip install -r requirements.txt
+      - run: uv sync --locked --no-dev
 
       - uses: actions/download-artifact@v8
         with:
