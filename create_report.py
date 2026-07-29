@@ -5,8 +5,8 @@ import yaml
 
 
 def append_to_file(content: str, filename: Path) -> None:
-    file_exists = Path.is_file(filename)
-    with Path.open(filename, "a", encoding="latin_1") as text_file:
+    file_exists = filename.is_file()
+    with filename.open("a", encoding="latin_1") as text_file:
         if not file_exists:
             url = "/".join([os.getenv("GITHUB_SERVER_URL", ""),
                             os.getenv("GITHUB_REPOSITORY", ""),
@@ -22,10 +22,8 @@ def append_to_file(content: str, filename: Path) -> None:
 
 def createReport() -> None:
     res: dict[str, dict[str, dict[str, tuple[int, str]]]] = {}
-    for file_name in Path.iterdir(Path.cwd()):
-        if not file_name.name.startswith("artifact_"):
-            continue
-        with Path.open(file_name, "rt", encoding="latin_1") as f:
+    for file_name in Path.cwd().glob("artifact_*.yml"):
+        with file_name.open("rt", encoding="latin_1") as f:
             d = yaml.safe_load(f)
 
         if d["pr"] not in res:
@@ -36,19 +34,14 @@ def createReport() -> None:
 
         res[d["pr"]][d["package"]][d["distro"]] = (d["res"], d["url"])
 
-    distros = []
+    distros = sorted({d for pr_ in res.values() for package_ in pr_.values() for d in package_})
 
-    for pr_ in res.values():
-        for package_ in pr_.values():
-            for d in package_:
-                if d not in distros:
-                    distros.append(d)
-    distros.sort()
-
-    Path.mkdir(Path("pages"), exist_ok=True)
-    os.chdir("pages")
-    Path.mkdir(Path("pr"), exist_ok=True)
-    Path.mkdir(Path("_includes"), exist_ok=True)
+    pages_folder = Path("pages")
+    pages_folder.mkdir(exist_ok=True)
+    pr_folder = pages_folder / "pr"
+    pr_folder.mkdir(exist_ok=True)
+    includes_folder = pages_folder / "_includes"
+    includes_folder.mkdir(exist_ok=True)
     for pr in sorted(res):
         if pr == "0":
             md = "\n# master\n\n"
@@ -78,11 +71,11 @@ def createReport() -> None:
             md += "\n"
         md += "\n"
         print(md)
-        with Path.open(Path("_includes") / f"{pr}.md", "w", encoding="latin_1") as text_file:
+        with (includes_folder / f"{pr}.md").open("w", encoding="latin_1") as text_file:
             text_file.write(md)
         md = f"{{% include {pr}.md %}}\n"
-        append_to_file(md, Path("pr") / f"{pr}.md")
-        append_to_file(md, Path("index.md"))
+        append_to_file(md, pr_folder / f"{pr}.md")
+        append_to_file(md, pages_folder / "index.md")
 
 
 if __name__ == "__main__":

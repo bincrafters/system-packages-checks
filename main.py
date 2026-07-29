@@ -32,20 +32,20 @@ class MatrixGenerator:
     async def populate_prs(self) -> None:
         page = 1
         while True:
-            async with self.session.get(f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls",
-                                        params={"state": "open",
-                                                "sort": "created",
-                                                "direction": "desc",
-                                                "per_page": 100,
-                                                "page": str(page)}) as r:
+            async with self.session.request("GET",
+                                            f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls",
+                                            params={"state": "open",
+                                                    "sort": "created",
+                                                    "direction": "desc",
+                                                    "per_page": 100,
+                                                    "page": str(page)}) as r:
                 r.raise_for_status()
                 if int(r.headers["X-RateLimit-Remaining"]) < 10:
                     logging.warning("%s/%s github api call used, remaining %s until %s",
                                     r.headers["X-Ratelimit-Used"], r.headers["X-RateLimit-Limit"], r.headers["X-RateLimit-Remaining"],
                                     datetime.fromtimestamp(int(r.headers["X-Ratelimit-Reset"])))
                 results = await r.json()
-            for p in results:
-                self.prs[int(p["number"])] = p
+            self.prs.update({int(p["number"]): p for p in results})
             page += 1
             if not results:
                 break
@@ -59,7 +59,7 @@ class MatrixGenerator:
     async def _get_modified_libs_for_pr(self, pr: int) -> set[str]:
         res: set[str] = set()
 
-        async with self.session.get(f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{pr}/files") as r:
+        async with self.session.request("GET", f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{pr}/files") as r:
             r.raise_for_status()
             if int(r.headers["X-RateLimit-Remaining"]) < 10:
                 logging.warning("%s/%s github api call used, remaining %s until %s",
@@ -80,12 +80,12 @@ class MatrixGenerator:
             refs = package.split("/")
             package = refs[0]
             modified_folder = refs[1] if len(refs) >= 2 else ""
-            async with self.session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/config.yml") as r:
+            async with self.session.request("GET", f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/config.yml") as r:
                 if r.status == 404:
                     folder = "system"
                     if modified_folder and modified_folder != folder:
                         return
-                    async with self.session.get(f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/{folder}/conanfile.py") as req:
+                    async with self.session.request("GET", f"https://raw.githubusercontent.com/{repo}/{ref}/recipes/{package}/{folder}/conanfile.py") as req:
                         if req.status == 404:
                             logging.warning("no system folder found for package %s in pr %s %s", package, pr, req.url)
                             return
@@ -111,11 +111,8 @@ class MatrixGenerator:
                         "folder": folder,
                         "pr": pr,
                         })
-        tasks = [_add_package(package.name, f"{self.owner}/{self.repo}", "master") for package in Path.iterdir(Path("CCI") / "recipes")]
-
-        for pr in self.prs.values():
-            pr_number = str(pr["number"])
-            tasks.extend(_add_package(package, f"{self.owner}/{self.repo}", pr["merge_commit_sha"], pr_number) for package in pr["libs"])
+        tasks = [_add_package(package.name, f"{self.owner}/{self.repo}", "master") for package in (Path("CCI") / "recipes").iterdir()]
+        tasks.extend(_add_package(package, f"{self.owner}/{self.repo}", pr["merge_commit_sha"], str(pr["number"])) for pr in self.prs.values() for package in pr["libs"])
 
         await asyncio.gather(*tasks)
 
@@ -138,10 +135,10 @@ class MatrixGenerator:
                 config["distro"] = distro
                 linux.append(config)
 
-        with Path.open(Path("matrixLinux.yml"), "w", encoding="latin_1") as f:
+        with Path("matrixLinux.yml").open("w", encoding="latin_1") as f:
             json.dump({"include": linux}, f)
 
-        with Path.open(Path("matrixBSD.yml"), "w", encoding="latin_1") as f:
+        with Path("matrixBSD.yml").open("w", encoding="latin_1") as f:
             json.dump({"include": res}, f)
 
 
