@@ -10,6 +10,9 @@ on:
   push:
     branches:
       - '**'
+    paths:
+      - '!.github/workflows/*'
+      - '.github/workflows/cron.yml'
   workflow_dispatch: {}
 
 
