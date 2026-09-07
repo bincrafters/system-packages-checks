@@ -6,10 +6,10 @@ import json
 import logging
 import os
 from datetime import datetime
-from pathlib import Path
 
 import aiohttp
 import yaml
+from anyio import Path
 
 
 class MatrixGenerator:
@@ -111,7 +111,7 @@ class MatrixGenerator:
                         "folder": folder,
                         "pr": pr,
                         })
-        tasks = [_add_package(package.name, f"{self.owner}/{self.repo}", "master") for package in (Path("CCI") / "recipes").iterdir()]
+        tasks = [_add_package(package.name, f"{self.owner}/{self.repo}", "master") async for package in (Path("CCI") / "recipes").iterdir()]
         tasks.extend(_add_package(package, f"{self.owner}/{self.repo}", pr["merge_commit_sha"], str(pr["number"])) for pr in self.prs.values() for package in pr["libs"])
 
         await asyncio.gather(*tasks)
@@ -135,11 +135,11 @@ class MatrixGenerator:
                 config["distro"] = distro
                 linux.append(config)
 
-        with Path("matrixLinux.yml").open("w", encoding="latin_1") as f:
-            json.dump({"include": linux}, f)
+        async with await Path("matrixLinux.yml").open("w", encoding="latin_1") as f:
+            await f.write(json.dumps({"include": linux}))
 
-        with Path("matrixBSD.yml").open("w", encoding="latin_1") as f:
-            json.dump({"include": res}, f)
+        async with await Path("matrixBSD.yml").open("w", encoding="latin_1") as f:
+            await f.write(json.dumps({"include": res}))
 
 
 async def main() -> None:

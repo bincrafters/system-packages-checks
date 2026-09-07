@@ -5,6 +5,7 @@ description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
     "aiohttp==3.14.3",
+    "anyio==4.15.1",
     "pyyaml==6.0.3",
     "requests==2.34.2",
 ]
@@ -17,4 +18,4 @@ dev = [
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["LOG015", "DTZ006", "PLR2004", "E501", "D101", "D107", "D102", "C901", "ASYNC230", "D103", "N802", "PLR0912", "T201", "D100", "CPY001"]
+ignore = ["LOG015", "DTZ006", "PLR2004", "E501", "D101", "D107", "D102", "C901", "D103", "N802", "PLR0912", "T201", "D100", "CPY001"]
