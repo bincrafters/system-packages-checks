@@ -13,7 +13,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff==0.16.7",
-    "ty==0.0.80",
+    "ty==0.0.81",
 ]
 
 [tool.ruff.lint]
