@@ -4,16 +4,16 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
-    "aiohttp==3.14.4",
-    "anyio==4.15.1",
-    "pyyaml==6.0.3",
-    "requests==2.34.2",
+    "aiohttp~=3.14",
+    "anyio~=4.15",
+    "pyyaml~=6.0",
+    "requests~=2.34",
 ]
 
 [dependency-groups]
 dev = [
-    "ruff==0.16.10",
-    "ty==0.0.85",
+    "ruff<1",
+    "ty<1",
 ]
 
 [tool.ruff.lint]
