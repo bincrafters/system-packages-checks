@@ -35,7 +35,7 @@ jobs:
         with:
           repository: conan-io/conan-center-index
           path: CCI
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
         with:
           activate-environment: true
       - run: uv sync --locked --no-dev
@@ -151,7 +151,7 @@ jobs:
           repository: ${{ matrix.repo }}
           ref: ${{ matrix.ref }}
           path: CCI
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
         with:
           version: "0.13.4"
           no-project: true
@@ -252,7 +252,7 @@ jobs:
     if: ${{ !cancelled() }}
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      - uses: astral-sh/setup-uv@18d369b23da25a81e9458561248e1aafff6a70fa # v10.3.1
         with:
           activate-environment: true
       - run: uv sync --locked --no-dev
